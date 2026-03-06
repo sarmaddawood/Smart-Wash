@@ -1,0 +1,386 @@
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    var orders = ViewBag.Orders as List<SmartWash.Models.Order> ?? new List<SmartWash.Models.Order>();
+    var serviceDict = ViewBag.ServiceDict as Dictionary<long, string> ?? new Dictionary<long, string>();
+    var profileDict = ViewBag.ProfileDict as Dictionary<string, SmartWash.Models.Profile> ?? new Dictionary<string, SmartWash.Models.Profile>();
+    var roleDict = ViewBag.RoleDict as Dictionary<long, string> ?? new Dictionary<long, string>();
+    var warehouses = ViewBag.Warehouses as List<SmartWash.Models.Warehouse> ?? new List<SmartWash.Models.Warehouse>();
+    var activeWarehouses = ViewBag.ActiveWarehouses as List<SmartWash.Models.Warehouse> ?? new List<SmartWash.Models.Warehouse>();
+    var staffList = ViewBag.StaffList as List<SmartWash.Models.Profile> ?? new List<SmartWash.Models.Profile>();
+    var riderList = ViewBag.RiderList as List<SmartWash.Models.Profile> ?? new List<SmartWash.Models.Profile>();
+    var customerList = ViewBag.CustomerList as List<SmartWash.Models.Profile> ?? new List<SmartWash.Models.Profile>();
+    var totalRevenue = (double)(ViewBag.TotalRevenue ?? 0.0);
+    var announcements = ViewBag.Announcements as List<SmartWash.Models.Announcement> ?? new List<SmartWash.Models.Announcement>();
+    var reviewDict = ViewBag.ReviewDict as Dictionary<long, SmartWash.Models.Review> ?? new Dictionary<long, SmartWash.Models.Review>();
+    var userName = ViewBag.UserName as string ?? "";
+    var pendingCount = orders.Count(o => o.Status == "Pending");
+    var inProgress = orders.Count(o => o.Status != "Pending" && o.Status != "Delivered" && o.Status != "Cancelled");
+    var delivered = orders.Count(o => o.Status == "Delivered");
+}
+
+<div class="sw-page-header">
+    <div class="container">
+        <div class="d-flex flex-wrap justify-content-between align-items-center">
+            <div>
+                <h2 class="fw-bold text-white mb-1"><i class="bi bi-shield-check me-2"></i>Admin Dashboard</h2>
+                <p class="text-white-50 mb-0">Welcome, @userName — full control panel</p>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="/Admin/Services" class="sw-btn sw-btn-outline" style="min-height:36px;padding:6px 16px;font-size:0.82rem;"><i class="bi bi-stars me-1"></i>Services</a>
+                <a href="/Admin/Warehouses" class="sw-btn sw-btn-outline" style="min-height:36px;padding:6px 16px;font-size:0.82rem;"><i class="bi bi-building me-1"></i>Warehouses</a>
+                <a href="/Admin/CreateAccount" class="sw-btn sw-btn-outline" style="min-height:36px;padding:6px 16px;font-size:0.82rem;"><i class="bi bi-person-plus me-1"></i>New Account</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="d-flex">
+    <div class="sw-admin-sidebar d-none d-lg-block">
+        <div class="px-4 mb-3"><span class="small fw-bold text-muted text-uppercase" style="letter-spacing:1px;">Navigation</span></div>
+        <a href="#adminStats" class="sw-sidebar-link active" onclick="showSection('stats')"><i class="bi bi-speedometer2"></i>Dashboard</a>
+        <a href="#adminOrders" class="sw-sidebar-link" onclick="showSection('orders')"><i class="bi bi-receipt"></i>Orders</a>
+        <a href="#adminAnnouncements" class="sw-sidebar-link" onclick="showSection('announcements')"><i class="bi bi-megaphone"></i>Announcements</a>
+        <a href="#adminCustomers" class="sw-sidebar-link" onclick="showSection('customers')"><i class="bi bi-people"></i>Customers</a>
+        <a href="#adminStaff" class="sw-sidebar-link" onclick="showSection('staff')"><i class="bi bi-person-badge"></i>Staff</a>
+        <a href="#adminRiders" class="sw-sidebar-link" onclick="showSection('riders')"><i class="bi bi-bicycle"></i>Riders</a>
+        <a href="#adminWarehouses" class="sw-sidebar-link" onclick="showSection('warehouses')"><i class="bi bi-building"></i>Warehouses</a>
+        <hr class="mx-4 my-3" />
+        <a href="/Admin/Services" class="sw-sidebar-link"><i class="bi bi-gear"></i>Manage Services</a>
+        <a href="/Admin/Warehouses" class="sw-sidebar-link"><i class="bi bi-geo-alt"></i>Manage Warehouses</a>
+        <a href="/Admin/CreateAccount" class="sw-sidebar-link"><i class="bi bi-person-plus"></i>Create Account</a>
+    </div>
+
+    <div class="flex-fill p-4">
+        <ul class="nav nav-pills sw-nav-pills mb-4 d-lg-none" role="tablist">
+            <li class="nav-item"><button class="nav-link active" onclick="showSection('stats')"><i class="bi bi-speedometer2"></i></button></li>
+            <li class="nav-item"><button class="nav-link" onclick="showSection('orders')"><i class="bi bi-receipt"></i></button></li>
+            <li class="nav-item"><button class="nav-link" onclick="showSection('announcements')"><i class="bi bi-megaphone"></i></button></li>
+            <li class="nav-item"><button class="nav-link" onclick="showSection('customers')"><i class="bi bi-people"></i></button></li>
+            <li class="nav-item"><button class="nav-link" onclick="showSection('staff')"><i class="bi bi-person-badge"></i></button></li>
+            <li class="nav-item"><button class="nav-link" onclick="showSection('riders')"><i class="bi bi-bicycle"></i></button></li>
+        </ul>
+
+        <div id="section-stats" class="admin-section">
+            <div class="row g-3 mb-4">
+                <div class="col-6 col-lg">
+                    <div class="sw-stat-card p-3 text-center">
+                        <i class="bi bi-receipt fs-3 text-primary"></i>
+                        <h4 class="fw-bold mt-1 mb-0">@orders.Count</h4>
+                        <p class="text-muted small mb-0">Total Orders</p>
+                    </div>
+                </div>
+                <div class="col-6 col-lg">
+                    <div class="sw-stat-card p-3 text-center" style="border-top:3px solid var(--sw-warning);">
+                        <i class="bi bi-clock fs-3 text-warning"></i>
+                        <h4 class="fw-bold mt-1 mb-0">@pendingCount</h4>
+                        <p class="text-muted small mb-0">Pending</p>
+                    </div>
+                </div>
+                <div class="col-6 col-lg">
+                    <div class="sw-stat-card p-3 text-center" style="border-top:3px solid var(--sw-primary);">
+                        <i class="bi bi-arrow-repeat fs-3 text-primary"></i>
+                        <h4 class="fw-bold mt-1 mb-0">@inProgress</h4>
+                        <p class="text-muted small mb-0">In Progress</p>
+                    </div>
+                </div>
+                <div class="col-6 col-lg">
+                    <div class="sw-stat-card p-3 text-center" style="border-top:3px solid var(--sw-success);">
+                        <i class="bi bi-check-circle fs-3" style="color:var(--sw-success);"></i>
+                        <h4 class="fw-bold mt-1 mb-0">@delivered</h4>
+                        <p class="text-muted small mb-0">Delivered</p>
+                    </div>
+                </div>
+                <div class="col-12 col-lg">
+                    <div class="sw-stat-card p-3 text-center" style="border-top:3px solid var(--sw-success);">
+                        <i class="bi bi-currency-exchange fs-3" style="color:var(--sw-success);"></i>
+                        <h4 class="fw-bold mt-1 mb-0">₱@totalRevenue.ToString("N2")</h4>
+                        <p class="text-muted small mb-0">Revenue</p>
+                    </div>
+                </div>
+            </div>
+            <div class="sw-card p-4">
+                <h5 class="fw-bold mb-3">Quick Overview</h5>
+                <div class="row g-3">
+                    <div class="col-md-3 text-center"><h6 class="text-muted small mb-1">Customers</h6><h4 class="fw-bold text-primary">@customerList.Count</h4></div>
+                    <div class="col-md-3 text-center"><h6 class="text-muted small mb-1">Staff</h6><h4 class="fw-bold text-primary">@staffList.Count</h4></div>
+                    <div class="col-md-3 text-center"><h6 class="text-muted small mb-1">Riders</h6><h4 class="fw-bold text-primary">@riderList.Count</h4></div>
+                    <div class="col-md-3 text-center"><h6 class="text-muted small mb-1">Warehouses</h6><h4 class="fw-bold text-primary">@warehouses.Count</h4></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="section-orders" class="admin-section d-none">
+            <div class="sw-card">
+                <div class="p-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-receipt text-primary me-2"></i>All Orders (@orders.Count)</h5>
+                    <div class="table-responsive">
+                        <table class="sw-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th><th>Customer</th><th>Service</th><th>Weight</th><th>Total</th>
+                                    <th>Status</th><th>Review</th><th>Staff</th><th>Warehouse</th><th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var o in orders)
+                                {
+                                    var customer = profileDict.ContainsKey(o.CustomerId) ? profileDict[o.CustomerId] : null;
+                                    var hasReview = reviewDict.ContainsKey(o.Id);
+                                    <tr>
+                                        <td class="fw-bold">#@o.Id</td>
+                                        <td class="small">@(customer != null ? customer.FullName : "—")</td>
+                                        <td class="small">@(serviceDict.ContainsKey(o.ServiceId) ? serviceDict[o.ServiceId] : "—")</td>
+                                        <td>@o.WeightKg kg</td>
+                                        <td class="fw-bold text-primary">₱@o.TotalPrice.ToString("F2")</td>
+                                        <td><span class="sw-status-badge sw-status-@o.Status.Replace(" ", "-").ToLower()">@o.Status</span></td>
+                                        <td>
+                                            @if (hasReview)
+                                            { <span class="text-warning small">@(new string('⭐', reviewDict[o.Id].Rating))</span> }
+                                            else
+                                            { <span class="text-muted small">—</span> }
+                                        </td>
+                                        <td>
+                                            @if (o.Status == "At Warehouse" || o.Status == "Picked Up")
+                                            {
+                                                <form method="post" action="/Admin/AssignStaff" class="d-flex gap-1">
+                                                    <input type="hidden" name="orderId" value="@o.Id" />
+                                                    <select name="staffId" class="form-select form-select-sm sw-input" style="width:110px;min-height:32px;padding:2px 8px;font-size:0.78rem;">
+                                                        <option value="">Select</option>
+                                                        @foreach (var s in staffList)
+                                                        { <option value="@s.Id" selected="@(o.StaffId == s.Id)">@s.FullName</option> }
+                                                    </select>
+                                                    <button type="submit" class="btn btn-sm btn-primary" style="border-radius:var(--sw-radius-xs);min-height:32px;"><i class="bi bi-check"></i></button>
+                                                </form>
+                                            }
+                                            else
+                                            {
+                                                var staff = !string.IsNullOrEmpty(o.StaffId) && profileDict.ContainsKey(o.StaffId) ? profileDict[o.StaffId] : null;
+                                                <span class="small">@(staff != null ? staff.FullName : "—")</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <form method="post" action="/Admin/AssignWarehouse" class="d-flex gap-1">
+                                                <input type="hidden" name="orderId" value="@o.Id" />
+                                                <select name="warehouseId" class="form-select form-select-sm sw-input" style="width:110px;min-height:32px;padding:2px 8px;font-size:0.78rem;">
+                                                    <option value="">Select</option>
+                                                    @foreach (var w in activeWarehouses)
+                                                    { <option value="@w.Id" selected="@(o.WarehouseId == w.Id)">@w.Name</option> }
+                                                </select>
+                                                <button type="submit" class="btn btn-sm btn-primary" style="border-radius:var(--sw-radius-xs);min-height:32px;"><i class="bi bi-check"></i></button>
+                                            </form>
+                                        </td>
+                                        <td><a href="/Order/Track/@o.Id" class="btn btn-sm btn-outline-primary" style="border-radius:var(--sw-radius-xs);min-height:32px;"><i class="bi bi-eye"></i></a></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="section-announcements" class="admin-section d-none">
+            <div class="sw-card mb-4">
+                <div class="p-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-plus-circle text-primary me-2"></i>Create Announcement</h5>
+                    <form method="post" action="/Admin/CreateAnnouncement">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <input type="text" name="title" class="form-control sw-input" placeholder="Title" required />
+                            </div>
+                            <div class="col-md-5">
+                                <input type="text" name="message" class="form-control sw-input" placeholder="Message content" required />
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-check form-switch mt-2">
+                                    <input class="form-check-input" type="checkbox" name="isActive" value="true" checked />
+                                    <label class="form-check-label small fw-semibold">Active</label>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="sw-btn sw-btn-primary w-100" style="min-height:40px;"><i class="bi bi-megaphone me-1"></i>Post</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="sw-card">
+                <div class="p-4">
+                    <h5 class="fw-bold mb-3">All Announcements (@announcements.Count)</h5>
+                    @foreach (var a in announcements)
+                    {
+                        <div class="sw-card mb-2 @(a.IsActive ? "" : "opacity-50")" style="border-left:3px solid @(a.IsActive ? "var(--sw-primary)" : "var(--sw-gray-300)");">
+                            <div class="p-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="fw-bold mb-1">@a.Title</h6>
+                                        <p class="text-muted small mb-1">@a.Message</p>
+                                        <span class="sw-status-badge @(a.IsActive ? "sw-status-delivered" : "sw-status-cancelled")">@(a.IsActive ? "Active" : "Inactive")</span>
+                                        <span class="text-muted ms-2" style="font-size:0.72rem;">@a.CreatedAt.ToString("MMM dd, yyyy HH:mm")</span>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-primary" style="border-radius:var(--sw-radius-xs);" data-bs-toggle="modal" data-bs-target="#editAnn-@a.Id">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    @if (!announcements.Any())
+                    {
+                        <div class="sw-empty-state"><i class="bi bi-megaphone"></i><p>No announcements yet</p></div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div id="section-customers" class="admin-section d-none">
+            <div class="sw-card">
+                <div class="p-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-people text-primary me-2"></i>Customers (@customerList.Count)</h5>
+                    <div class="table-responsive">
+                        <table class="sw-table">
+                            <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Joined</th></tr></thead>
+                            <tbody>
+                                @foreach (var c in customerList)
+                                {
+                                    <tr>
+                                        <td class="fw-semibold">@c.FullName</td>
+                                        <td class="small">@c.Email</td>
+                                        <td class="small">+63 @c.Phone</td>
+                                        <td class="small">@c.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="section-staff" class="admin-section d-none">
+            <div class="sw-card">
+                <div class="p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0"><i class="bi bi-person-badge text-primary me-2"></i>Staff (@staffList.Count)</h5>
+                        <a href="/Admin/CreateAccount" class="sw-btn sw-btn-primary" style="min-height:36px;padding:6px 16px;font-size:0.85rem;"><i class="bi bi-plus"></i> Add Staff</a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="sw-table">
+                            <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Joined</th></tr></thead>
+                            <tbody>
+                                @foreach (var s in staffList)
+                                {
+                                    <tr>
+                                        <td class="fw-semibold">@s.FullName</td>
+                                        <td class="small">@s.Email</td>
+                                        <td class="small">+63 @s.Phone</td>
+                                        <td class="small">@s.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="section-riders" class="admin-section d-none">
+            <div class="sw-card">
+                <div class="p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0"><i class="bi bi-bicycle text-primary me-2"></i>Riders (@riderList.Count)</h5>
+                        <a href="/Admin/CreateAccount" class="sw-btn sw-btn-primary" style="min-height:36px;padding:6px 16px;font-size:0.85rem;"><i class="bi bi-plus"></i> Add Rider</a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="sw-table">
+                            <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Joined</th></tr></thead>
+                            <tbody>
+                                @foreach (var r in riderList)
+                                {
+                                    <tr>
+                                        <td class="fw-semibold">@r.FullName</td>
+                                        <td class="small">@r.Email</td>
+                                        <td class="small">+63 @r.Phone</td>
+                                        <td class="small">@r.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="section-warehouses" class="admin-section d-none">
+            <div class="sw-card">
+                <div class="p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0"><i class="bi bi-building text-primary me-2"></i>Warehouses (@warehouses.Count)</h5>
+                        <a href="/Admin/Warehouses" class="sw-btn sw-btn-primary" style="min-height:36px;padding:6px 16px;font-size:0.85rem;"><i class="bi bi-gear"></i> Manage</a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="sw-table">
+                            <thead><tr><th>Name</th><th>Address</th><th>Coordinates</th><th>Status</th></tr></thead>
+                            <tbody>
+                                @foreach (var w in warehouses)
+                                {
+                                    <tr>
+                                        <td class="fw-semibold">@w.Name</td>
+                                        <td class="small">@w.Address</td>
+                                        <td class="small">@w.Lat.ToString("F4"), @w.Lng.ToString("F4")</td>
+                                        <td><span class="sw-status-badge @(w.IsActive ? "sw-status-delivered" : "sw-status-cancelled")">@(w.IsActive ? "Active" : "Inactive")</span></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@foreach (var a in announcements)
+{
+    <div class="modal fade" id="editAnn-@a.Id" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius:var(--sw-radius-lg);">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-pencil text-primary me-2"></i>Edit Announcement</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="post" action="/Admin/UpdateAnnouncement">
+                    <div class="modal-body">
+                        <input type="hidden" name="id" value="@a.Id" />
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Title</label>
+                            <input type="text" name="title" class="form-control sw-input" value="@a.Title" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Message</label>
+                            <textarea name="message" class="form-control sw-input" rows="3" required>@a.Message</textarea>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="isActive" value="true" @(a.IsActive ? "checked" : "") />
+                            <label class="form-check-label">Active</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="submit" class="sw-btn sw-btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+<script>
+    function showSection(name) {
+        document.querySelectorAll('.admin-section').forEach(s => s.classList.add('d-none'));
+        document.getElementById('section-' + name).classList.remove('d-none');
+        document.querySelectorAll('.sw-sidebar-link').forEach(l => l.classList.remove('active'));
+        event.target.closest('.sw-sidebar-link')?.classList.add('active');
+    }
+</script>
+}

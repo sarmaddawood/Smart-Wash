@@ -1,0 +1,51 @@
+@{
+    ViewData["Title"] = "Login";
+}
+
+<div class="sw-auth-bg">
+    <div class="sw-auth-card">
+        <div class="p-5">
+            <div class="text-center mb-4">
+                <div class="sw-auth-logo">🫧</div>
+                <h4 class="fw-bold mt-2 mb-1">Welcome Back</h4>
+                <p class="text-muted small">Sign in to your SmartWash account</p>
+            </div>
+
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger py-2 px-3 rounded-3 small" role="alert">
+                    <i class="bi bi-exclamation-circle me-1"></i> @ViewBag.Error
+                </div>
+            }
+
+            <form method="post" action="/Auth/Login">
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">Email Address</label>
+                    <div class="input-group">
+                        <span class="sw-input-icon"><i class="bi bi-envelope"></i></span>
+                        <input type="email" name="email" class="form-control sw-input" placeholder="juan@email.com" required />
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label small fw-semibold">Password</label>
+                    <div class="input-group">
+                        <span class="sw-input-icon"><i class="bi bi-lock"></i></span>
+                        <input type="password" name="password" class="form-control sw-input" placeholder="Enter your password" required />
+                    </div>
+                </div>
+                <button type="submit" class="sw-btn sw-btn-primary w-100 mb-3">
+                    <i class="bi bi-box-arrow-in-right"></i> Sign In
+                </button>
+            </form>
+
+            <p class="text-center small text-muted mb-3">
+                Don't have an account? <a href="/Auth/Register" class="text-primary fw-semibold">Create one</a>
+            </p>
+
+            <div class="sw-trust-note">
+                <i class="bi bi-shield-lock-fill text-success"></i>
+                Your data is safe with us. We never share your information.
+            </div>
+        </div>
+    </div>
+</div>

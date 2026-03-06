@@ -1,0 +1,309 @@
+@{
+    ViewData["Title"] = "Place Order";
+    var services = ViewBag.Services as List<SmartWash.Models.Service> ?? new List<SmartWash.Models.Service>();
+    var userName = ViewBag.UserName as string ?? "";
+    var userEmail = ViewBag.UserEmail as string ?? "";
+    var userPhone = ViewBag.UserPhone as string ?? "";
+}
+
+<div class="sw-page-header">
+    <div class="container">
+        <h2 class="fw-bold text-white mb-1"><i class="bi bi-basket-fill me-2"></i>Place New Order</h2>
+        <p class="text-white-50 mb-0">Follow the steps below to place your laundry order</p>
+    </div>
+</div>
+
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="sw-wizard mb-4">
+                <div class="sw-wizard-step active" data-step="1"><span class="sw-step-badge">1</span>Details</div>
+                <div class="sw-wizard-step" data-step="2"><span class="sw-step-badge">2</span>Service</div>
+                <div class="sw-wizard-step" data-step="3"><span class="sw-step-badge">3</span>Location</div>
+                <div class="sw-wizard-step" data-step="4"><span class="sw-step-badge">4</span>Schedule</div>
+            </div>
+
+            <form method="post" action="/Order/Place" id="orderForm">
+                <div class="sw-step-content" id="step1">
+                    <div class="sw-card mb-4">
+                        <div class="p-4">
+                            <h5 class="fw-bold mb-3"><i class="bi bi-person-fill text-primary me-2"></i>Personal Details</h5>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold small">Full Name</label>
+                                <div class="input-group">
+                                    <span class="sw-input-icon"><i class="bi bi-person"></i></span>
+                                    <input type="text" class="form-control sw-input" value="@userName" readonly />
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold small">Email</label>
+                                <div class="input-group">
+                                    <span class="sw-input-icon"><i class="bi bi-envelope"></i></span>
+                                    <input type="email" class="form-control sw-input" value="@userEmail" readonly />
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold small">Phone</label>
+                                <div class="input-group">
+                                    <span class="sw-input-icon fw-semibold">+63</span>
+                                    <input type="text" class="form-control sw-input" value="@userPhone" readonly />
+                                </div>
+                            </div>
+                            <button type="button" class="sw-btn sw-btn-primary" onclick="goToStep(2)">
+                                Continue <i class="bi bi-arrow-right ms-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sw-step-content d-none" id="step2">
+                    <div class="sw-card mb-4">
+                        <div class="p-4">
+                            <h5 class="fw-bold mb-3"><i class="bi bi-stars text-primary me-2"></i>Select Service & Weight</h5>
+                            <div class="row g-3 mb-3">
+                                @foreach (var svc in services)
+                                {
+                                    <div class="col-md-6">
+                                        <div class="sw-service-select-card p-3" data-service-id="@svc.Id" data-price="@svc.PricePerKg" data-name="@svc.Name" data-max="@svc.MaxKg" onclick="selectService(this)">
+                                            <div class="d-flex align-items-center">
+                                                <div class="sw-service-icon-wrap me-3" style="width:48px;height:48px;margin:0;font-size:1.3rem;">@svc.Icon</div>
+                                                <div>
+                                                    <h6 class="fw-bold mb-0">@svc.Name</h6>
+                                                    <span class="text-primary fw-bold small">₱@svc.PricePerKg/kg</span>
+                                                    <span class="sw-max-tag ms-1" style="font-size:0.7rem;padding:2px 8px;">Up to @svc.MaxKg kg</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            <input type="hidden" name="serviceId" id="serviceId" />
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold small">Weight (kg)</label>
+                                <input type="range" class="form-range" id="weightSlider" min="0.5" max="8" step="0.5" value="1" oninput="syncWeight(this.value)" />
+                                <div class="d-flex justify-content-between">
+                                    <span class="small text-muted">0.5 kg</span>
+                                    <span class="small fw-bold text-primary" id="weightDisplay">1 kg</span>
+                                    <span class="small text-muted" id="maxWeightLabel">8 kg</span>
+                                </div>
+                                <input type="hidden" name="weightKg" id="weightKg" value="1" />
+                            </div>
+                            <div class="sw-total-display p-4 text-center mb-3">
+                                <span class="small text-muted d-block mb-1">Estimated Total</span>
+                                <span class="display-6 fw-bold text-primary" id="totalPrice">₱0.00</span>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold small">Special Instructions (optional)</label>
+                                <textarea name="specialInstructions" class="form-control sw-input" rows="2" placeholder="e.g., Separate whites and colors, use mild detergent..."></textarea>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="sw-btn sw-btn-outline" style="color:var(--sw-gray-500);border-color:var(--sw-gray-300);" onclick="goToStep(1)">
+                                    <i class="bi bi-arrow-left"></i> Back
+                                </button>
+                                <button type="button" class="sw-btn sw-btn-primary" onclick="goToStep(3)">
+                                    Continue <i class="bi bi-arrow-right ms-1"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sw-step-content d-none" id="step3">
+                    <div class="sw-card mb-4">
+                        <div class="p-4">
+                            <h5 class="fw-bold mb-3"><i class="bi bi-geo-alt-fill text-primary me-2"></i>Pickup & Delivery Location</h5>
+                            <div id="orderMap" style="height:350px;border-radius:12px;" class="mb-3"></div>
+                            <button type="button" class="sw-btn sw-btn-outline mb-3" style="color:var(--sw-primary);border-color:var(--sw-primary);min-height:36px;padding:6px 16px;font-size:0.85rem;" onclick="useMyLocation()">
+                                <i class="bi bi-crosshair"></i> Use My Location
+                            </button>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold small"><i class="bi bi-geo-alt text-danger me-1"></i>Pickup Address</label>
+                                    <input type="text" name="pickupAddress" id="pickupAddress" class="form-control sw-input" placeholder="📍 Drag the red pin or type your address — e.g., 123 Rizal Ave, Makati City" />
+                                    <input type="hidden" name="pickupLat" id="pickupLat" />
+                                    <input type="hidden" name="pickupLng" id="pickupLng" />
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold small"><i class="bi bi-house text-success me-1"></i>Delivery Address</label>
+                                    <input type="text" name="deliveryAddress" id="deliveryAddress" class="form-control sw-input" placeholder="🏠 Drag the green pin or type — e.g., 456 EDSA, Quezon City" />
+                                    <input type="hidden" name="deliveryLat" id="deliveryLat" />
+                                    <input type="hidden" name="deliveryLng" id="deliveryLng" />
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2 mt-3">
+                                <button type="button" class="sw-btn sw-btn-outline" style="color:var(--sw-gray-500);border-color:var(--sw-gray-300);" onclick="goToStep(2)">
+                                    <i class="bi bi-arrow-left"></i> Back
+                                </button>
+                                <button type="button" class="sw-btn sw-btn-primary" onclick="goToStep(4)">
+                                    Continue <i class="bi bi-arrow-right ms-1"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sw-step-content d-none" id="step4">
+                    <div class="sw-card mb-4">
+                        <div class="p-4">
+                            <h5 class="fw-bold mb-3"><i class="bi bi-calendar-event text-primary me-2"></i>Schedule Pickup</h5>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold small">Preferred Pickup Date</label>
+                                <input type="date" name="pickupDate" id="pickupDate" class="form-control sw-input" onchange="updateEstimatedDelivery()" />
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold small">Estimated Delivery</label>
+                                <input type="text" id="estimatedDelivery" class="form-control sw-input" readonly />
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="sw-btn sw-btn-outline" style="color:var(--sw-gray-500);border-color:var(--sw-gray-300);" onclick="goToStep(3)">
+                                    <i class="bi bi-arrow-left"></i> Back
+                                </button>
+                                <button type="submit" class="sw-btn sw-btn-primary sw-btn-pulse flex-fill">
+                                    <i class="bi bi-check-circle"></i> Place Order
+                                </button>
+                            </div>
+                            <div class="sw-trust-note mt-3">
+                                <i class="bi bi-shield-lock-fill text-success"></i>
+                                Your data is safe with us. We never share your information.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="sw-card sw-summary-card sticky-top" style="top:80px;">
+                <div class="p-4">
+                    <h6 class="fw-bold mb-3"><i class="bi bi-receipt text-primary me-2"></i>Order Summary</h6>
+                    <div class="d-flex justify-content-between small mb-2">
+                        <span class="text-muted">Service:</span>
+                        <span class="fw-semibold" id="summaryService">—</span>
+                    </div>
+                    <div class="d-flex justify-content-between small mb-2">
+                        <span class="text-muted">Weight:</span>
+                        <span class="fw-semibold" id="summaryWeight">—</span>
+                    </div>
+                    <hr />
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="fw-bold">Total:</span>
+                        <span class="fw-bold text-primary fs-5" id="summaryTotal">₱0.00</span>
+                    </div>
+                    <hr />
+                    <div class="small mb-1">
+                        <i class="bi bi-geo-alt text-danger me-1"></i>
+                        <span class="text-muted" id="summaryPickup">Pickup: Not set</span>
+                    </div>
+                    <div class="small">
+                        <i class="bi bi-house text-success me-1"></i>
+                        <span class="text-muted" id="summaryDelivery">Delivery: Not set</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    var selectedPrice = 0;
+    var selectedName = '';
+    var selectedMax = 8;
+    var map, pickupMarker, deliveryMarker;
+
+    function selectService(el) {
+        document.querySelectorAll('.sw-service-select-card').forEach(c => c.classList.remove('selected'));
+        el.classList.add('selected');
+        document.getElementById('serviceId').value = el.dataset.serviceId;
+        selectedPrice = parseFloat(el.dataset.price);
+        selectedName = el.dataset.name;
+        selectedMax = parseFloat(el.dataset.max);
+        document.getElementById('weightSlider').max = selectedMax;
+        document.getElementById('maxWeightLabel').textContent = selectedMax + ' kg';
+        updateTotal();
+    }
+
+    function syncWeight(val) {
+        document.getElementById('weightKg').value = val;
+        document.getElementById('weightDisplay').textContent = val + ' kg';
+        updateTotal();
+    }
+
+    function updateTotal() {
+        var weight = parseFloat(document.getElementById('weightKg').value) || 0;
+        var total = (selectedPrice * weight).toFixed(2);
+        document.getElementById('totalPrice').textContent = '₱' + total;
+        document.getElementById('summaryService').textContent = selectedName || '—';
+        document.getElementById('summaryWeight').textContent = weight + ' kg';
+        document.getElementById('summaryTotal').textContent = '₱' + total;
+    }
+
+    function goToStep(step) {
+        document.querySelectorAll('.sw-step-content').forEach(s => s.classList.add('d-none'));
+        document.getElementById('step' + step).classList.remove('d-none');
+        document.querySelectorAll('.sw-wizard-step').forEach((s, i) => {
+            s.classList.remove('active', 'completed');
+            if ((i + 1) < step) s.classList.add('completed');
+            if ((i + 1) === step) s.classList.add('active');
+        });
+        if (step === 3 && !map) initMap();
+    }
+
+    function initMap() {
+        map = L.map('orderMap').setView([14.5995, 120.9842], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+        var pickupIcon = L.divIcon({ html: '<i class="bi bi-geo-alt-fill text-danger fs-3"></i>', className: 'sw-map-icon', iconSize: [30, 30], iconAnchor: [15, 30] });
+        var deliveryIcon = L.divIcon({ html: '<i class="bi bi-house-fill text-success fs-3"></i>', className: 'sw-map-icon', iconSize: [30, 30], iconAnchor: [15, 30] });
+        pickupMarker = L.marker([14.5995, 120.9742], { draggable: true, icon: pickupIcon }).addTo(map).bindPopup('📍 Pickup Location');
+        deliveryMarker = L.marker([14.5995, 120.9942], { draggable: true, icon: deliveryIcon }).addTo(map).bindPopup('🏠 Delivery Location');
+        pickupMarker.on('dragend', function () { reverseGeocode(pickupMarker, 'pickup'); });
+        deliveryMarker.on('dragend', function () { reverseGeocode(deliveryMarker, 'delivery'); });
+        reverseGeocode(pickupMarker, 'pickup');
+        reverseGeocode(deliveryMarker, 'delivery');
+        setTimeout(function () { map.invalidateSize(); }, 300);
+    }
+
+    function reverseGeocode(marker, type) {
+        var lat = marker.getLatLng().lat;
+        var lng = marker.getLatLng().lng;
+        document.getElementById(type + 'Lat').value = lat;
+        document.getElementById(type + 'Lng').value = lng;
+        fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lng)
+            .then(r => r.json())
+            .then(data => {
+                var addr = data.display_name || '';
+                document.getElementById(type + 'Address').value = addr;
+                document.getElementById('summary' + (type === 'pickup' ? 'Pickup' : 'Delivery')).textContent = (type === 'pickup' ? 'Pickup: ' : 'Delivery: ') + addr.substring(0, 50) + '...';
+            });
+    }
+
+    function useMyLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function (pos) {
+                var lat = pos.coords.latitude;
+                var lng = pos.coords.longitude;
+                map.setView([lat, lng], 15);
+                pickupMarker.setLatLng([lat, lng]);
+                deliveryMarker.setLatLng([lat + 0.002, lng + 0.002]);
+                reverseGeocode(pickupMarker, 'pickup');
+                reverseGeocode(deliveryMarker, 'delivery');
+            });
+        }
+    }
+
+    function updateEstimatedDelivery() {
+        var pickupDate = document.getElementById('pickupDate').value;
+        if (pickupDate) {
+            var d = new Date(pickupDate);
+            var isExpress = selectedName.toLowerCase().includes('express');
+            if (!isExpress) d.setDate(d.getDate() + 1);
+            document.getElementById('estimatedDelivery').value = d.toLocaleDateString('en-PH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        }
+    }
+
+    var today = new Date().toISOString().split('T')[0];
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('pickupDate').min = today;
+    });
+</script>
+}

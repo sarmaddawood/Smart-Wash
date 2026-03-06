@@ -1,0 +1,154 @@
+@{
+    ViewData["Title"] = "Track Order";
+    var order = ViewBag.Order as SmartWash.Models.Order;
+    var service = ViewBag.Service as SmartWash.Models.Service;
+    var rider = ViewBag.Rider as SmartWash.Models.Profile;
+    var warehouse = ViewBag.Warehouse as SmartWash.Models.Warehouse;
+    var customer = ViewBag.Customer as SmartWash.Models.Profile;
+
+    var statuses = new[] { "Pending", "Rider Assigned", "Picked Up", "At Warehouse", "Washing", "Ready for Delivery", "Out for Delivery", "Delivered" };
+    var statusIcons = new[] { "bi-clock", "bi-bicycle", "bi-box-seam", "bi-building", "bi-water", "bi-stars", "bi-truck", "bi-check-circle" };
+    var statusEmojis = new[] { "⏳", "🏍️", "📦", "🏭", "🫧", "✨", "🚀", "🎉" };
+    var currentIndex = Array.IndexOf(statuses, order.Status);
+    var isCancelled = order.Status == "Cancelled";
+}
+
+<div class="sw-page-header">
+    <div class="container">
+        <div class="d-flex flex-wrap justify-content-between align-items-center">
+            <div>
+                <h2 class="fw-bold text-white mb-1"><i class="bi bi-geo-alt-fill me-2"></i>Order #@order.Id</h2>
+                <p class="text-white-50 mb-0">Real-time order status tracking</p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span class="sw-status-badge sw-status-@order.Status.Replace(" ", "-").ToLower() fs-6">@order.Status</span>
+                @if (!isCancelled)
+                {
+                    <span class="sw-live-badge">Live • updates every 30s</span>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container py-4">
+    <div class="row g-4">
+        <div class="col-lg-8">
+            @if (!isCancelled)
+            {
+                <div class="sw-card mb-4">
+                    <div class="p-4">
+                        <h5 class="fw-bold mb-4"><i class="bi bi-diagram-3 text-primary me-2"></i>Order Progress</h5>
+                        <div class="sw-tracker">
+                            @for (int i = 0; i < statuses.Length; i++)
+                            {
+                                var isCompleted = i <= currentIndex;
+                                var isCurrent = i == currentIndex;
+                                <div class="sw-tracker-step @(isCompleted ? "completed" : "") @(isCurrent ? "current" : "")">
+                                    <div class="sw-tracker-dot">
+                                        @if (isCompleted)
+                                        { <i class="bi bi-check-lg"></i> }
+                                        else
+                                        { <span>@(i + 1)</span> }
+                                    </div>
+                                    <div class="sw-tracker-info">
+                                        <span class="fw-semibold">@statusEmojis[i] @statuses[i]</span>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="sw-card mb-4">
+                    <div class="p-5 text-center">
+                        <i class="bi bi-x-circle-fill text-danger" style="font-size:3rem;"></i>
+                        <h4 class="fw-bold mt-3 mb-2">Order Cancelled</h4>
+                        <p class="text-muted">This order has been cancelled.</p>
+                    </div>
+                </div>
+            }
+
+            @if (rider != null)
+            {
+                <div class="sw-card mb-4">
+                    <div class="p-4">
+                        <h5 class="fw-bold mb-3"><i class="bi bi-bicycle text-primary me-2"></i>Your Rider</h5>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="sw-avatar">
+                                    <i class="bi bi-person-fill fs-4 text-primary"></i>
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold mb-0">@rider.FullName</h6>
+                                    <p class="text-muted mb-0 small"><i class="bi bi-telephone me-1"></i>+63 @rider.Phone</p>
+                                </div>
+                            </div>
+                            <a href="tel:+63@rider.Phone" class="sw-btn sw-btn-primary" style="min-height:36px;padding:6px 16px;font-size:0.85rem;">
+                                <i class="bi bi-telephone"></i> Call
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="col-lg-4">
+            <div class="sw-card sw-summary-card sticky-top" style="top:80px;">
+                <div class="p-4">
+                    <h6 class="fw-bold mb-3"><i class="bi bi-receipt text-primary me-2"></i>Order Details</h6>
+                    <div class="d-flex justify-content-between small mb-2">
+                        <span class="text-muted">Service:</span>
+                        <span class="fw-semibold">@service.Icon @service.Name</span>
+                    </div>
+                    <div class="d-flex justify-content-between small mb-2">
+                        <span class="text-muted">Weight:</span>
+                        <span class="fw-semibold">@order.WeightKg kg</span>
+                    </div>
+                    <div class="d-flex justify-content-between small mb-2">
+                        <span class="text-muted">Total:</span>
+                        <span class="fw-bold text-primary fs-5">₱@order.TotalPrice.ToString("F2")</span>
+                    </div>
+                    <hr />
+                    <div class="small mb-2">
+                        <i class="bi bi-geo-alt text-danger me-1"></i>
+                        <span class="text-muted">@order.PickupAddress</span>
+                    </div>
+                    <div class="small mb-2">
+                        <i class="bi bi-house text-success me-1"></i>
+                        <span class="text-muted">@order.DeliveryAddress</span>
+                    </div>
+                    <hr />
+                    <div class="d-flex justify-content-between small mb-2">
+                        <span class="text-muted">Pickup Date:</span>
+                        <span class="fw-semibold">@order.PickupDate</span>
+                    </div>
+                    <div class="d-flex justify-content-between small mb-2">
+                        <span class="text-muted">Est. Delivery:</span>
+                        <span class="fw-bold" style="color:var(--sw-success);">@order.EstimatedDelivery</span>
+                    </div>
+                    @if (warehouse != null)
+                    {
+                        <hr />
+                        <div class="small">
+                            <i class="bi bi-building text-primary me-1"></i>
+                            <span class="text-muted">Warehouse: @warehouse.Name</span>
+                        </div>
+                    }
+                    <hr />
+                    <a href="/Order/Receipt/@order.Id" class="sw-btn sw-btn-primary w-100" style="min-height:40px;">
+                        <i class="bi bi-receipt"></i> View Receipt
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    setTimeout(function () { location.reload(); }, 30000);
+</script>
+}

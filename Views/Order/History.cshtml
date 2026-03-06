@@ -1,0 +1,140 @@
+@{
+    ViewData["Title"] = "Order History";
+    var orders = ViewBag.Orders as List<SmartWash.Models.Order> ?? new List<SmartWash.Models.Order>();
+    var serviceDict = ViewBag.ServiceDict as Dictionary<long, string> ?? new Dictionary<long, string>();
+    var reviewedOrderIds = ViewBag.ReviewedOrderIds as HashSet<long> ?? new HashSet<long>();
+    var currentFilter = ViewBag.CurrentFilter as string ?? "All";
+    var statuses = new[] { "All", "Pending", "Rider Assigned", "Picked Up", "At Warehouse", "Washing", "Ready for Delivery", "Out for Delivery", "Delivered", "Cancelled" };
+}
+
+<div class="sw-page-header">
+    <div class="container">
+        <h2 class="fw-bold text-white mb-1"><i class="bi bi-clock-history me-2"></i>Order History</h2>
+        <p class="text-white-50 mb-0">View all your past and current orders</p>
+    </div>
+</div>
+
+<div class="container py-4">
+    <div class="sw-card">
+        <div class="p-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+                <h5 class="fw-bold mb-0"><i class="bi bi-list-ul text-primary me-2"></i>All Orders (@orders.Count)</h5>
+                <form method="get" action="/Order/History" class="d-flex align-items-center gap-2">
+                    <label class="small fw-semibold text-muted">Filter:</label>
+                    <select name="statusFilter" class="form-select form-select-sm sw-input" style="width:auto;min-height:36px;" onchange="this.form.submit()">
+                        @foreach (var s in statuses)
+                        {
+                            <option value="@s" selected="@(currentFilter == s)">@s</option>
+                        }
+                    </select>
+                </form>
+            </div>
+            <div class="table-responsive">
+                <table class="sw-table">
+                    <thead>
+                        <tr><th>ID</th><th>Service</th><th>Weight</th><th>Total</th><th>Status</th><th>Date</th><th>Est. Delivery</th><th></th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var o in orders)
+                        {
+                            <tr>
+                                <td class="fw-bold">#@o.Id</td>
+                                <td>@(serviceDict.ContainsKey(o.ServiceId) ? serviceDict[o.ServiceId] : "—")</td>
+                                <td>@o.WeightKg kg</td>
+                                <td class="fw-bold text-primary">₱@o.TotalPrice.ToString("F2")</td>
+                                <td><span class="sw-status-badge sw-status-@o.Status.Replace(" ", "-").ToLower()">@o.Status</span></td>
+                                <td class="small">@o.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                <td class="small">@o.EstimatedDelivery</td>
+                                <td>
+                                    <div class="d-flex gap-1">
+                                        <a href="/Order/Track/@o.Id" class="btn btn-sm btn-outline-primary" style="border-radius:var(--sw-radius-sm);"><i class="bi bi-eye me-1"></i>Track</a>
+                                        @if (o.Status == "Delivered" && !reviewedOrderIds.Contains(o.Id))
+                                        {
+                                            <button class="btn btn-sm btn-outline-warning" style="border-radius:var(--sw-radius-sm);" data-bs-toggle="modal" data-bs-target="#reviewModal" onclick="setReviewOrder(@o.Id)">
+                                                <i class="bi bi-star me-1"></i>Review
+                                            </button>
+                                        }
+                                        @if (o.Status == "Delivered" && reviewedOrderIds.Contains(o.Id))
+                                        {
+                                            <button class="btn btn-sm btn-warning text-white" style="border-radius:var(--sw-radius-sm);" onclick="viewReview(@o.Id)">
+                                                <i class="bi bi-star-fill me-1"></i>View
+                                            </button>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            @if (!orders.Any())
+            {
+                <div class="sw-empty-state">
+                    <i class="bi bi-inbox"></i>
+                    <p>No orders found for this filter</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="reviewModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:var(--sw-radius-lg);">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold"><i class="bi bi-star-fill text-warning me-2"></i>Leave a Review</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="/Customer/SubmitReview">
+                <div class="modal-body">
+                    <input type="hidden" name="orderId" id="reviewOrderId" />
+                    <div class="mb-3 text-center">
+                        <input type="hidden" name="rating" id="ratingValue" value="5" />
+                        <i class="bi bi-star-fill fs-2 text-warning sw-star" onclick="setRating(1)"></i>
+                        <i class="bi bi-star-fill fs-2 text-warning sw-star" onclick="setRating(2)"></i>
+                        <i class="bi bi-star-fill fs-2 text-warning sw-star" onclick="setRating(3)"></i>
+                        <i class="bi bi-star-fill fs-2 text-warning sw-star" onclick="setRating(4)"></i>
+                        <i class="bi bi-star-fill fs-2 text-warning sw-star" onclick="setRating(5)"></i>
+                    </div>
+                    <textarea name="comment" class="form-control sw-input" rows="3" placeholder="Tell us about your experience..."></textarea>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="submit" class="sw-btn sw-btn-primary w-100">Submit Review</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="viewReviewModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:var(--sw-radius-lg);">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold"><i class="bi bi-star-fill text-warning me-2"></i>Your Review</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center" id="viewReviewBody"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function setReviewOrder(id) { document.getElementById('reviewOrderId').value = id; }
+    function setRating(val) {
+        document.getElementById('ratingValue').value = val;
+        document.querySelectorAll('.sw-star').forEach(function (s, i) {
+            s.classList.toggle('text-warning', i < val);
+            s.classList.toggle('text-muted', i >= val);
+        });
+    }
+    function viewReview(id) {
+        fetch('/Customer/ViewReview?orderId=' + id).then(r => r.json()).then(data => {
+            var stars = '';
+            for (var i = 0; i < 5; i++) stars += i < data.rating ? '⭐' : '☆';
+            document.getElementById('viewReviewBody').innerHTML = '<div class="fs-2 mb-2">' + stars + '</div><p class="text-muted">' + (data.comment || 'No comment') + '</p>';
+            new bootstrap.Modal(document.getElementById('viewReviewModal')).show();
+        });
+    }
+</script>
+}

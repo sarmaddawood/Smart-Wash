@@ -1,0 +1,98 @@
+@{
+    ViewData["Title"] = "Manage Services";
+    var services = ViewBag.Services as List<SmartWash.Models.Service> ?? new List<SmartWash.Models.Service>();
+}
+
+<div class="sw-page-header">
+    <div class="container">
+        <div class="d-flex flex-wrap justify-content-between align-items-center">
+            <div>
+                <h2 class="fw-bold text-white mb-1"><i class="bi bi-stars me-2"></i>Manage Services</h2>
+                <p class="text-white-50 mb-0">Add, edit, and toggle services</p>
+            </div>
+            <a href="/Admin/Dashboard" class="sw-btn sw-btn-outline" style="min-height:36px;padding:6px 16px;font-size:0.85rem;"><i class="bi bi-arrow-left me-1"></i>Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+
+<div class="container py-4">
+    <div class="sw-card mb-4">
+        <div class="p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-plus-circle text-primary me-2"></i>Add New Service</h5>
+            <form method="post" action="/Admin/CreateService">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-2"><label class="form-label small fw-semibold">Name</label><input type="text" name="name" class="form-control sw-input" placeholder="Regular Wash" required /></div>
+                    <div class="col-md-3"><label class="form-label small fw-semibold">Description</label><input type="text" name="description" class="form-control sw-input" placeholder="Everyday clothes wash" required /></div>
+                    <div class="col-md-2"><label class="form-label small fw-semibold">Price/kg (₱)</label><input type="number" name="pricePerKg" class="form-control sw-input" step="0.01" placeholder="55" required /></div>
+                    <div class="col-md-1"><label class="form-label small fw-semibold">Icon</label><input type="text" name="icon" class="form-control sw-input" placeholder="🧺" required /></div>
+                    <div class="col-md-1"><label class="form-label small fw-semibold">Max Kg</label><input type="number" name="maxKg" class="form-control sw-input" placeholder="8" required /></div>
+                    <div class="col-md-1">
+                        <div class="form-check form-switch mt-2">
+                            <input class="form-check-input" type="checkbox" name="isActive" value="true" checked />
+                            <label class="form-check-label small">Active</label>
+                        </div>
+                    </div>
+                    <div class="col-md-2"><button type="submit" class="sw-btn sw-btn-primary w-100" style="min-height:44px;"><i class="bi bi-plus me-1"></i>Add</button></div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        @foreach (var s in services)
+        {
+            <div class="col-md-6 col-lg-4">
+                <div class="sw-card h-100 @(s.IsActive ? "" : "opacity-50")" style="border-top:3px solid @(s.IsActive ? "var(--sw-primary)" : "var(--sw-gray-300)");">
+                    <div class="p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="sw-service-icon-wrap" style="width:48px;height:48px;margin:0;font-size:1.3rem;">@s.Icon</div>
+                            <span class="sw-status-badge @(s.IsActive ? "sw-status-delivered" : "sw-status-cancelled")">@(s.IsActive ? "Active" : "Inactive")</span>
+                        </div>
+                        <h6 class="fw-bold mt-2">@s.Name</h6>
+                        <p class="text-muted small mb-2">@s.Description</p>
+                        <div class="d-flex gap-2 mb-3">
+                            <span class="sw-price-tag">₱@s.PricePerKg/kg</span>
+                            <span class="sw-max-tag">Up to @s.MaxKg kg</span>
+                        </div>
+                        <button class="sw-btn sw-btn-primary w-100" style="min-height:36px;padding:6px 12px;font-size:0.85rem;" data-bs-toggle="modal" data-bs-target="#editSvc-@s.Id">
+                            <i class="bi bi-pencil me-1"></i>Edit
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@foreach (var s in services)
+{
+    <div class="modal fade" id="editSvc-@s.Id" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius:var(--sw-radius-lg);">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-pencil text-primary me-2"></i>Edit Service</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="post" action="/Admin/UpdateService">
+                    <div class="modal-body">
+                        <input type="hidden" name="id" value="@s.Id" />
+                        <div class="mb-3"><label class="form-label small fw-semibold">Name</label><input type="text" name="name" class="form-control sw-input" value="@s.Name" required /></div>
+                        <div class="mb-3"><label class="form-label small fw-semibold">Description</label><input type="text" name="description" class="form-control sw-input" value="@s.Description" required /></div>
+                        <div class="row g-3">
+                            <div class="col-4"><label class="form-label small fw-semibold">Price/kg</label><input type="number" name="pricePerKg" class="form-control sw-input" step="0.01" value="@s.PricePerKg" required /></div>
+                            <div class="col-4"><label class="form-label small fw-semibold">Icon</label><input type="text" name="icon" class="form-control sw-input" value="@s.Icon" required /></div>
+                            <div class="col-4"><label class="form-label small fw-semibold">Max Kg</label><input type="number" name="maxKg" class="form-control sw-input" value="@s.MaxKg" required /></div>
+                        </div>
+                        <div class="form-check form-switch mt-3">
+                            <input class="form-check-input" type="checkbox" name="isActive" value="true" @(s.IsActive ? "checked" : "") />
+                            <label class="form-check-label">Active</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="submit" class="sw-btn sw-btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}

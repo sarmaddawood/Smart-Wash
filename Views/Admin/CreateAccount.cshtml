@@ -1,0 +1,85 @@
+@{
+    ViewData["Title"] = "Create Account";
+}
+
+<div class="sw-page-header">
+    <div class="container">
+        <div class="d-flex flex-wrap justify-content-between align-items-center">
+            <div>
+                <h2 class="fw-bold text-white mb-1"><i class="bi bi-person-plus me-2"></i>Create Account</h2>
+                <p class="text-white-50 mb-0">Register new staff or rider accounts</p>
+            </div>
+            <a href="/Admin/Dashboard" class="sw-btn sw-btn-outline" style="min-height:36px;padding:6px 16px;font-size:0.85rem;"><i class="bi bi-arrow-left me-1"></i>Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="sw-card">
+                <div class="p-5">
+                    <div class="text-center mb-4">
+                        <div class="sw-auth-logo mx-auto">👤</div>
+                        <h4 class="fw-bold mt-3">New Account</h4>
+                        <p class="text-muted small">Create a staff or rider account for your team</p>
+                    </div>
+
+                    @if (ViewBag.Success != null)
+                    {
+                        <div class="alert alert-success py-2 px-3 rounded-3 small">
+                            <i class="bi bi-check-circle me-1"></i> @ViewBag.Success
+                        </div>
+                    }
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger py-2 px-3 rounded-3 small">
+                            <i class="bi bi-exclamation-circle me-1"></i> @ViewBag.Error
+                        </div>
+                    }
+
+                    <form method="post" action="/Admin/CreateAccount">
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Full Name</label>
+                            <div class="input-group">
+                                <span class="sw-input-icon"><i class="bi bi-person"></i></span>
+                                <input type="text" name="fullName" class="form-control sw-input" placeholder="Juan Dela Cruz" required />
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Email Address</label>
+                            <div class="input-group">
+                                <span class="sw-input-icon"><i class="bi bi-envelope"></i></span>
+                                <input type="email" name="email" class="form-control sw-input" placeholder="juan@smartwash.ph" required />
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Password</label>
+                            <div class="input-group">
+                                <span class="sw-input-icon"><i class="bi bi-lock"></i></span>
+                                <input type="password" name="password" class="form-control sw-input" placeholder="Minimum 6 characters" required />
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Phone Number</label>
+                            <div class="input-group">
+                                <span class="sw-input-icon fw-semibold">+63</span>
+                                <input type="text" name="phone" class="form-control sw-input" placeholder="917 123 4567" required />
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label small fw-semibold">Role</label>
+                            <select name="roleName" class="form-select sw-input" required>
+                                <option value="staff"><i class="bi bi-person-badge"></i> Staff</option>
+                                <option value="rider"><i class="bi bi-bicycle"></i> Rider</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="sw-btn sw-btn-primary w-100">
+                            <i class="bi bi-person-plus"></i> Create Account
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

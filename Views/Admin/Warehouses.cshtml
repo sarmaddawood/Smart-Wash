@@ -1,0 +1,125 @@
+@{
+    ViewData["Title"] = "Manage Warehouses";
+    var warehouses = ViewBag.Warehouses as List<SmartWash.Models.Warehouse> ?? new List<SmartWash.Models.Warehouse>();
+}
+
+<div class="sw-page-header">
+    <div class="container">
+        <div class="d-flex flex-wrap justify-content-between align-items-center">
+            <div>
+                <h2 class="fw-bold text-white mb-1"><i class="bi bi-building me-2"></i>Manage Warehouses</h2>
+                <p class="text-white-50 mb-0">Add, edit, and manage warehouse locations</p>
+            </div>
+            <a href="/Admin/Dashboard" class="sw-btn sw-btn-outline" style="min-height:36px;padding:6px 16px;font-size:0.85rem;"><i class="bi bi-arrow-left me-1"></i>Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+
+<div class="container py-4">
+    <div class="sw-card mb-4">
+        <div class="p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-plus-circle text-primary me-2"></i>Add Warehouse</h5>
+            <div id="addWarehouseMap" style="height:300px;border-radius:var(--sw-radius);" class="mb-3"></div>
+            <form method="post" action="/Admin/CreateWarehouse" id="addWarehouseForm">
+                <div class="row g-3">
+                    <div class="col-md-3"><label class="form-label small fw-semibold">Name</label><input type="text" name="name" class="form-control sw-input" placeholder="Main Hub — Makati" required /></div>
+                    <div class="col-md-5"><label class="form-label small fw-semibold">Address</label><input type="text" name="address" id="addAddress" class="form-control sw-input" placeholder="📍 Drop pin on map or type address" required /></div>
+                    <div class="col-md-1"><input type="hidden" name="lat" id="addLat" /><input type="hidden" name="lng" id="addLng" /></div>
+                    <div class="col-md-1">
+                        <label class="form-label small fw-semibold">Active</label>
+                        <div class="form-check form-switch mt-1">
+                            <input class="form-check-input" type="checkbox" name="isActive" value="true" checked />
+                        </div>
+                    </div>
+                    <div class="col-md-2"><label class="form-label small fw-semibold">&nbsp;</label><button type="submit" class="sw-btn sw-btn-primary w-100" style="min-height:44px;"><i class="bi bi-plus me-1"></i>Add</button></div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <h5 class="fw-bold mb-3"><i class="bi bi-list-ul text-primary me-2"></i>All Warehouses (@warehouses.Count)</h5>
+
+    @if (warehouses.Any())
+    {
+        <div class="table-responsive">
+            <div class="sw-card">
+                <div class="p-4">
+                    <table class="sw-table">
+                        <thead><tr><th>Name</th><th>Address</th><th>Coordinates</th><th>Status</th><th></th></tr></thead>
+                        <tbody>
+                            @foreach (var w in warehouses)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">@w.Name</td>
+                                    <td class="small">@w.Address</td>
+                                    <td class="small">@w.Lat.ToString("F4"), @w.Lng.ToString("F4")</td>
+                                    <td><span class="sw-status-badge @(w.IsActive ? "sw-status-delivered" : "sw-status-cancelled")">@(w.IsActive ? "Active" : "Inactive")</span></td>
+                                    <td><button class="btn btn-sm btn-outline-primary" style="border-radius:var(--sw-radius-xs);" data-bs-toggle="modal" data-bs-target="#editWh-@w.Id"><i class="bi bi-pencil"></i></button></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="sw-card"><div class="sw-empty-state"><i class="bi bi-building"></i><p>No warehouses yet</p></div></div>
+    }
+</div>
+
+@foreach (var w in warehouses)
+{
+    <div class="modal fade" id="editWh-@w.Id" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius:var(--sw-radius-lg);">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-pencil text-primary me-2"></i>Edit Warehouse</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="post" action="/Admin/UpdateWarehouse">
+                    <div class="modal-body">
+                        <input type="hidden" name="id" value="@w.Id" />
+                        <div class="mb-3"><label class="form-label small fw-semibold">Name</label><input type="text" name="name" class="form-control sw-input" value="@w.Name" required /></div>
+                        <div class="mb-3"><label class="form-label small fw-semibold">Address</label><input type="text" name="address" class="form-control sw-input" value="@w.Address" required /></div>
+                        <div class="row g-3">
+                            <div class="col-6"><label class="form-label small fw-semibold">Latitude</label><input type="text" name="lat" class="form-control sw-input" value="@w.Lat" required /></div>
+                            <div class="col-6"><label class="form-label small fw-semibold">Longitude</label><input type="text" name="lng" class="form-control sw-input" value="@w.Lng" required /></div>
+                        </div>
+                        <div class="form-check form-switch mt-3">
+                            <input class="form-check-input" type="checkbox" name="isActive" value="true" @(w.IsActive ? "checked" : "") />
+                            <label class="form-check-label">Active</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="submit" class="sw-btn sw-btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var map = L.map('addWarehouseMap').setView([14.5995, 120.9842], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+        var marker = L.marker([14.5995, 120.9842], { draggable: true }).addTo(map);
+        marker.on('dragend', function () { reverseGeocode(marker); });
+        map.on('click', function (e) { marker.setLatLng(e.latlng); reverseGeocode(marker); });
+        reverseGeocode(marker);
+
+        function reverseGeocode(m) {
+            var lat = m.getLatLng().lat;
+            var lng = m.getLatLng().lng;
+            document.getElementById('addLat').value = lat;
+            document.getElementById('addLng').value = lng;
+            fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lng)
+                .then(r => r.json())
+                .then(data => { document.getElementById('addAddress').value = data.display_name || ''; });
+        }
+    });
+</script>
+}

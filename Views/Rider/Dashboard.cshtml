@@ -1,0 +1,256 @@
+@{
+    ViewData["Title"] = "Rider Dashboard";
+    var pendingOrders = ViewBag.PendingOrders as List<SmartWash.Models.Order> ?? new List<SmartWash.Models.Order>();
+    var readyOrders = ViewBag.ReadyOrders as List<SmartWash.Models.Order> ?? new List<SmartWash.Models.Order>();
+    var myActiveOrders = ViewBag.MyActiveOrders as List<SmartWash.Models.Order> ?? new List<SmartWash.Models.Order>();
+    var serviceDict = ViewBag.ServiceDict as Dictionary<long, string> ?? new Dictionary<long, string>();
+    var warehouseDict = ViewBag.WarehouseDict as Dictionary<long, SmartWash.Models.Warehouse> ?? new Dictionary<long, SmartWash.Models.Warehouse>();
+    var profileDict = ViewBag.ProfileDict as Dictionary<string, SmartWash.Models.Profile> ?? new Dictionary<string, SmartWash.Models.Profile>();
+    var userName = ViewBag.UserName as string ?? "";
+}
+
+<div class="sw-page-header">
+    <div class="container">
+        <div class="d-flex flex-wrap justify-content-between align-items-center">
+            <div>
+                <h2 class="fw-bold text-white mb-1"><i class="bi bi-bicycle me-2"></i>Rider Dashboard</h2>
+                <p class="text-white-50 mb-0">Welcome back, @userName 🏍️</p>
+            </div>
+            <div class="d-flex gap-2 align-items-center">
+                <span class="sw-live-badge">Live • auto-refresh</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container py-4">
+    <div class="row g-3 mb-4">
+        <div class="col-4">
+            <div class="sw-stat-card p-3 text-center" style="border-left:4px solid var(--sw-primary);">
+                <h4 class="fw-bold mb-0 text-primary">@pendingOrders.Count</h4>
+                <p class="text-muted small mb-0">Available Pickups</p>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="sw-stat-card p-3 text-center" style="border-left:4px solid var(--sw-orange);">
+                <h4 class="fw-bold mb-0" style="color:var(--sw-orange);">@myActiveOrders.Count</h4>
+                <p class="text-muted small mb-0">Active Jobs</p>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="sw-stat-card p-3 text-center" style="border-left:4px solid var(--sw-success);">
+                <h4 class="fw-bold mb-0" style="color:var(--sw-success);">@readyOrders.Count</h4>
+                <p class="text-muted small mb-0">Deliveries Ready</p>
+            </div>
+        </div>
+    </div>
+
+    <ul class="nav nav-pills sw-nav-pills mb-4" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#pickups">
+                <i class="bi bi-box-seam me-1"></i>🔵 Pickups <span class="badge bg-white text-primary ms-1">@pendingOrders.Count</span>
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#myjobs">
+                <i class="bi bi-briefcase me-1"></i>🟠 Active <span class="badge bg-white text-dark ms-1">@myActiveOrders.Count</span>
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#deliveries">
+                <i class="bi bi-truck me-1"></i>🟢 Deliveries <span class="badge bg-white text-dark ms-1">@readyOrders.Count</span>
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <div class="tab-pane fade show active" id="pickups">
+            @if (pendingOrders.Any())
+            {
+                <div class="row g-3">
+                    @foreach (var o in pendingOrders)
+                    {
+                        var customer = profileDict.ContainsKey(o.CustomerId) ? profileDict[o.CustomerId] : null;
+                        <div class="col-md-6">
+                            <div class="sw-card" style="border-top:3px solid var(--sw-primary);">
+                                <div class="p-4">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="fw-bold mb-0">Order #@o.Id</h6>
+                                        <span class="sw-status-badge sw-status-pending">Pending</span>
+                                    </div>
+                                    <p class="small text-muted mb-1"><i class="bi bi-stars me-1"></i>@(serviceDict.ContainsKey(o.ServiceId) ? serviceDict[o.ServiceId] : "—") • @o.WeightKg kg • <span class="text-primary fw-bold">₱@o.TotalPrice.ToString("F2")</span></p>
+                                    <p class="small text-muted mb-1"><i class="bi bi-geo-alt text-danger me-1"></i>@o.PickupAddress</p>
+                                    @if (customer != null)
+                                    {
+                                        <p class="small text-muted mb-2"><i class="bi bi-person me-1"></i>@customer.FullName • +63 @customer.Phone</p>
+                                    }
+                                    <form method="post" action="/Rider/AcceptPickup">
+                                        <input type="hidden" name="id" value="@o.Id" />
+                                        <button type="submit" class="sw-btn sw-btn-primary w-100" style="min-height:40px;">
+                                            <i class="bi bi-check-circle"></i> Accept Pickup
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="sw-card"><div class="sw-empty-state"><i class="bi bi-inbox"></i><p>No available pickups right now</p></div></div>
+            }
+        </div>
+
+        <div class="tab-pane fade" id="myjobs">
+            @if (myActiveOrders.Any())
+            {
+                <div class="row g-3">
+                    @foreach (var o in myActiveOrders)
+                    {
+                        var customer = profileDict.ContainsKey(o.CustomerId) ? profileDict[o.CustomerId] : null;
+                        var warehouse = o.WarehouseId.HasValue && warehouseDict.ContainsKey(o.WarehouseId.Value) ? warehouseDict[o.WarehouseId.Value] : null;
+                        <div class="col-md-6">
+                            <div class="sw-card" style="border-top:3px solid var(--sw-orange);">
+                                <div class="p-4">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="fw-bold mb-0">Order #@o.Id</h6>
+                                        <span class="sw-status-badge sw-status-@o.Status.Replace(" ", "-").ToLower()">@o.Status</span>
+                                    </div>
+                                    @if (customer != null)
+                                    {
+                                        <p class="small text-muted mb-1"><i class="bi bi-person me-1"></i>@customer.FullName • +63 @customer.Phone</p>
+                                    }
+                                    @if (warehouse != null)
+                                    {
+                                        <div class="alert alert-info py-2 px-3 rounded-3 small mb-2" style="border-left:3px solid var(--sw-primary);">
+                                            <i class="bi bi-building me-1"></i><strong>@warehouse.Name</strong> — @warehouse.Address
+                                        </div>
+                                    }
+                                    <p class="small text-muted mb-1"><i class="bi bi-geo-alt text-danger me-1"></i>@o.PickupAddress</p>
+                                    <p class="small text-muted mb-2"><i class="bi bi-house text-success me-1"></i>@o.DeliveryAddress</p>
+
+                                    <div id="riderMap-@o.Id" style="height:180px;border-radius:var(--sw-radius-sm);" class="mb-3"></div>
+
+                                    @if (o.Status == "Rider Assigned")
+                                    {
+                                        <form method="post" action="/Rider/UpdateStatus">
+                                            <input type="hidden" name="id" value="@o.Id" />
+                                            <input type="hidden" name="status" value="Picked Up" />
+                                            <button type="submit" class="sw-btn w-100" style="background:var(--sw-warning);color:#fff;min-height:44px;"><i class="bi bi-box-seam me-1"></i>Mark Picked Up</button>
+                                        </form>
+                                    }
+                                    @if (o.Status == "Picked Up")
+                                    {
+                                        <form method="post" action="/Rider/UpdateStatus">
+                                            <input type="hidden" name="id" value="@o.Id" />
+                                            <input type="hidden" name="status" value="At Warehouse" />
+                                            <button type="submit" class="sw-btn w-100" style="background:var(--sw-info);color:#fff;min-height:44px;"><i class="bi bi-building me-1"></i>Mark At Warehouse</button>
+                                        </form>
+                                    }
+                                    @if (o.Status == "Out for Delivery")
+                                    {
+                                        <form method="post" action="/Rider/UpdateStatus">
+                                            <input type="hidden" name="id" value="@o.Id" />
+                                            <input type="hidden" name="status" value="Delivered" />
+                                            <button type="submit" class="sw-btn w-100" style="background:var(--sw-success);color:#fff;min-height:44px;"><i class="bi bi-check-circle me-1"></i>Mark Delivered</button>
+                                        </form>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="sw-card"><div class="sw-empty-state"><i class="bi bi-briefcase"></i><p>No active jobs</p></div></div>
+            }
+        </div>
+
+        <div class="tab-pane fade" id="deliveries">
+            @if (readyOrders.Any())
+            {
+                <div class="row g-3">
+                    @foreach (var o in readyOrders)
+                    {
+                        var customer = profileDict.ContainsKey(o.CustomerId) ? profileDict[o.CustomerId] : null;
+                        <div class="col-md-6">
+                            <div class="sw-card" style="border-top:3px solid var(--sw-success);">
+                                <div class="p-4">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="fw-bold mb-0">Order #@o.Id</h6>
+                                        <span class="sw-status-badge sw-status-ready-for-delivery">Ready</span>
+                                    </div>
+                                    <p class="small text-muted mb-1"><i class="bi bi-house text-success me-1"></i>@o.DeliveryAddress</p>
+                                    @if (customer != null)
+                                    {
+                                        <p class="small text-muted mb-2"><i class="bi bi-person me-1"></i>@customer.FullName • +63 @customer.Phone</p>
+                                    }
+                                    <form method="post" action="/Rider/AcceptDelivery">
+                                        <input type="hidden" name="id" value="@o.Id" />
+                                        <button type="submit" class="sw-btn w-100" style="background:var(--sw-success);color:#fff;min-height:40px;">
+                                            <i class="bi bi-truck"></i> Accept Delivery
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="sw-card"><div class="sw-empty-state"><i class="bi bi-truck"></i><p>No available deliveries</p></div></div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var orders = [
+            @foreach (var o in myActiveOrders)
+            {
+                var wh = o.WarehouseId.HasValue && warehouseDict.ContainsKey(o.WarehouseId.Value) ? warehouseDict[o.WarehouseId.Value] : null;
+                <text>
+                {
+                    id: @o.Id, status: '@o.Status',
+                    pickupLat: @o.PickupLat, pickupLng: @o.PickupLng,
+                    deliveryLat: @o.DeliveryLat, deliveryLng: @o.DeliveryLng,
+                    warehouseLat: @(wh != null ? wh.Lat.ToString() : "0"),
+                    warehouseLng: @(wh != null ? wh.Lng.ToString() : "0"),
+                    warehouseName: '@(wh != null ? wh.Name : "")'
+                },
+                </text>
+            }
+        ];
+        orders.forEach(function (o) {
+            var mapEl = document.getElementById('riderMap-' + o.id);
+            if (!mapEl) return;
+            var map = L.map(mapEl).setView([12.8797, 121.7740], 12);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+            if (o.status === 'Rider Assigned' || o.status === 'Picked Up') {
+                var pickupIcon = L.divIcon({ html: '<i class="bi bi-geo-alt-fill text-danger fs-4"></i>', className: 'sw-map-icon', iconSize: [24, 24] });
+                var whIcon = L.divIcon({ html: '<i class="bi bi-building-fill text-primary fs-4"></i>', className: 'sw-map-icon', iconSize: [24, 24] });
+                L.marker([o.pickupLat, o.pickupLng], { icon: pickupIcon }).addTo(map).bindPopup('Customer Pickup');
+                if (o.warehouseLat) {
+                    L.marker([o.warehouseLat, o.warehouseLng], { icon: whIcon }).addTo(map).bindPopup(o.warehouseName);
+                    L.polyline([[o.pickupLat, o.pickupLng], [o.warehouseLat, o.warehouseLng]], { color: '#2563EB', weight: 3, dashArray: '8' }).addTo(map);
+                    map.fitBounds([[o.pickupLat, o.pickupLng], [o.warehouseLat, o.warehouseLng]], { padding: [30, 30] });
+                } else map.setView([o.pickupLat, o.pickupLng], 14);
+            } else if (o.status === 'Out for Delivery') {
+                var whIcon2 = L.divIcon({ html: '<i class="bi bi-building-fill text-primary fs-4"></i>', className: 'sw-map-icon', iconSize: [24, 24] });
+                var delIcon = L.divIcon({ html: '<i class="bi bi-house-fill text-success fs-4"></i>', className: 'sw-map-icon', iconSize: [24, 24] });
+                if (o.warehouseLat) L.marker([o.warehouseLat, o.warehouseLng], { icon: whIcon2 }).addTo(map).bindPopup(o.warehouseName);
+                L.marker([o.deliveryLat, o.deliveryLng], { icon: delIcon }).addTo(map).bindPopup('Delivery Location');
+                if (o.warehouseLat) {
+                    L.polyline([[o.warehouseLat, o.warehouseLng], [o.deliveryLat, o.deliveryLng]], { color: '#16a34a', weight: 3, dashArray: '8' }).addTo(map);
+                    map.fitBounds([[o.warehouseLat, o.warehouseLng], [o.deliveryLat, o.deliveryLng]], { padding: [30, 30] });
+                } else map.setView([o.deliveryLat, o.deliveryLng], 14);
+            }
+        });
+    });
+</script>
+}
