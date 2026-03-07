@@ -22,22 +22,34 @@ namespace SmartWash.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(string email, string password)
         {
-            var session = await _supabase.Auth.SignIn(email, password);
-
             var profileResponse = await _supabase.From<Profile>()
-                .Filter("id", Operator.Equals, session.User.Id)
-                .Single();
+                .Filter("email", Operator.Equals, email)
+                .Get();
+
+            var profile = profileResponse.Models.FirstOrDefault();
+
+            if (profile == null || profile.Password != password)
+            {
+                ViewBag.Error = "Invalid email or password.";
+                return View();
+            }
 
             var roleResponse = await _supabase.From<Role>()
-                .Filter("id", Operator.Equals, profileResponse.RoleId.ToString())
+                .Filter("id", Operator.Equals, profile.RoleId)
                 .Single();
 
-            HttpContext.Session.SetString("UserId", session.User.Id);
-            HttpContext.Session.SetString("UserName", profileResponse.FullName);
-            HttpContext.Session.SetString("UserEmail", profileResponse.Email);
-            HttpContext.Session.SetString("UserPhone", profileResponse.Phone ?? "");
+            if (roleResponse == null)
+            {
+                ViewBag.Error = "User role not found.";
+                return View();
+            }
+
+            HttpContext.Session.SetString("UserId", profile.Id);
+            HttpContext.Session.SetString("UserName", profile.FullName);
+            HttpContext.Session.SetString("UserEmail", profile.Email);
+            HttpContext.Session.SetString("UserPhone", profile.Phone ?? "");
             HttpContext.Session.SetString("UserRole", roleResponse.Name);
-            HttpContext.Session.SetString("RoleId", profileResponse.RoleId.ToString());
+            HttpContext.Session.SetString("RoleId", profile.RoleId);
 
             return roleResponse.Name switch
             {
@@ -57,29 +69,43 @@ namespace SmartWash.Controllers
         [HttpPost]
         public async Task<IActionResult> Register(string fullName, string email, string password, string phone)
         {
-            var session = await _supabase.Auth.SignUp(email, password);
-
             var customerRole = await _supabase.From<Role>()
                 .Filter("name", Operator.Equals, "customer")
                 .Single();
 
+            if (customerRole == null)
+            {
+                ViewBag.Error = "Internal error: Customer role not found.";
+                return View();
+            }
+
             var profile = new Profile
             {
-                Id = session.User.Id,
                 FullName = fullName,
                 Email = email,
                 Phone = phone,
-                RoleId = customerRole.Id
+                RoleId = customerRole.Id,
+                Password = password
             };
 
             await _supabase.From<Profile>().Insert(profile);
 
-            HttpContext.Session.SetString("UserId", session.User.Id);
+            var savedProfile = await _supabase.From<Profile>()
+                .Filter("email", Operator.Equals, email)
+                .Single();
+
+            if (savedProfile == null)
+            {
+                ViewBag.Error = "Internal error: Failed to retrieve saved profile.";
+                return View();
+            }
+
+            HttpContext.Session.SetString("UserId", savedProfile.Id);
             HttpContext.Session.SetString("UserName", fullName);
             HttpContext.Session.SetString("UserEmail", email);
             HttpContext.Session.SetString("UserPhone", phone);
             HttpContext.Session.SetString("UserRole", "customer");
-            HttpContext.Session.SetString("RoleId", customerRole.Id.ToString());
+            HttpContext.Session.SetString("RoleId", customerRole.Id);
 
             return RedirectToAction("Dashboard", "Customer");
         }

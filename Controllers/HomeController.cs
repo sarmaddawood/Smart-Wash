@@ -16,15 +16,15 @@ namespace SmartWash.Controllers
         public async Task<IActionResult> Index()
         {
             var response = await _supabase.From<SmartWash.Models.Service>().Get();
-            ViewBag.Services = response.Models.Where(s => s.IsActive).ToList();
-            ViewBag.UserName = HttpContext.Session.GetString("UserName");
-            ViewBag.UserRole = HttpContext.Session.GetString("UserRole");
+            ViewBag.Services = response.Models?.Where(s => s.IsActive).ToList() ?? new List<SmartWash.Models.Service>();
+            ViewBag.UserName = HttpContext.Session.GetString("UserName") ?? "Guest";
+            ViewBag.UserRole = HttpContext.Session.GetString("UserRole") ?? "Guest";
 
-            var announcements = await _supabase.From<Announcement>()
+            var announcementsResponse = await _supabase.From<Announcement>()
                 .Filter("is_active", Operator.Equals, "true")
                 .Order("created_at", Ordering.Descending)
                 .Get();
-            ViewBag.Announcements = announcements.Models;
+            ViewBag.Announcements = announcementsResponse.Models ?? new List<Announcement>();
 
             return View();
         }

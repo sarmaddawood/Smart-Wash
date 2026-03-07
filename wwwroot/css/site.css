@@ -95,7 +95,7 @@ a {
 .sw-navbar .nav-link {
     color: rgba(255, 255, 255, 0.7) !important;
     font-weight: 500;
-    font-size: 0.88rem;
+    font-size: 0.82rem;
     padding: 0.5rem 0.9rem !important;
     transition: var(--sw-transition);
     border-radius: var(--sw-radius-sm);
@@ -900,6 +900,97 @@ a {
     border-left-color: var(--sw-success);
 }
 
+:root {
+    --sw-bg: #f8fafc;
+    --sw-card-bg: #ffffff;
+    --sw-border: #e2e8f0;
+    --sw-text-main: #0f172a;
+    --sw-text-muted: #64748b;
+    --sw-primary: #2563eb;
+    --sw-primary-hover: #1d4ed8;
+}
+
+body {
+    background-color: var(--sw-bg);
+    color: var(--sw-text-main);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-weight: 700;
+    color: var(--sw-text-main);
+    margin-bottom: 1rem;
+}
+
+h1 {
+    font-size: 18px;
+}
+
+h2 {
+    font-size: 17px;
+}
+
+h3 {
+    font-size: 16px;
+}
+
+label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--sw-text-muted);
+    margin-bottom: 0.25rem;
+}
+
+.card {
+    background-color: var(--sw-card-bg);
+    border: 1px solid var(--sw-border);
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.p-3 {
+    padding: 1rem !important;
+}
+
+.fs-12 {
+    font-size: 12px !important;
+}
+
+.text-nowrap {
+    white-space: nowrap !important;
+}
+
+.text-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.badge.rounded-pill.fs-12 {
+    padding: 0.35em 0.8em;
+    font-weight: 500;
+}
+
+.table-sm th,
+.table-sm td {
+    padding: 0.5rem 0.75rem;
+    font-size: 13px;
+    vertical-align: middle;
+}
+
+.btn-sm {
+    font-size: 12px;
+    padding: 0.25rem 0.75rem;
+    font-weight: 500;
+}
+
 .sw-tracker-dot {
     position: absolute;
     left: -16px;
@@ -1296,4 +1387,316 @@ a {
 
 ::-webkit-scrollbar-thumb:hover {
     background: var(--sw-gray-400);
+}
+
+/* ==========================================================================
+   PAGE ANIMATIONS & RESPONSIVENESS (ADDED)
+   ========================================================================== */
+
+/* Smooth Scroll */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Page Transition Animations */
+@keyframes pageEnter {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.page-wrapper {
+    animation: pageEnter 0.35s ease forwards;
+    will-change: opacity, transform;
+}
+
+.page-exit {
+    opacity: 0 !important;
+    transform: translateY(-8px) !important;
+    transition: opacity 0.3s ease, transform 0.3s ease !important;
+}
+
+/* Tab Switching Animations */
+.tab-content>.tab-pane {
+    display: none;
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.tab-content>.active {
+    display: block;
+    animation: tabEnter 0.3s ease forwards;
+}
+
+@keyframes tabEnter {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.nav-tabs .nav-link {
+    position: relative;
+    transition: color 0.2s ease;
+}
+
+.nav-tabs .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 10%;
+    width: 80%;
+    height: 2px;
+    background-color: var(--sw-primary);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.nav-tabs .nav-link.active::after {
+    transform: scaleX(1);
+}
+
+/* Base button overrides & active states */
+.btn {
+    transition: all 0.2s ease;
+}
+
+.btn:hover,
+.sw-btn:hover {
+    transform: translateY(-2px);
+}
+
+.btn:active,
+.sw-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+.btn:disabled,
+.sw-btn:disabled,
+.btn.disabled,
+.sw-btn.disabled {
+    opacity: 0.6;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Card staggered entrance logic */
+.sw-card,
+.card {
+    transition: all 0.25s ease;
+}
+
+.sw-card.animate-stagger,
+.card.animate-stagger {
+    opacity: 0;
+    animation: cardEnter 0.4s ease forwards;
+}
+
+@keyframes cardEnter {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.delay-1 {
+    animation-delay: 50ms;
+}
+
+.delay-2 {
+    animation-delay: 100ms;
+}
+
+.delay-3 {
+    animation-delay: 150ms;
+}
+
+.delay-4 {
+    animation-delay: 200ms;
+}
+
+.delay-5 {
+    animation-delay: 250ms;
+}
+
+.delay-6 {
+    animation-delay: 300ms;
+}
+
+/* Form inputs focus/error animations */
+.form-control,
+.form-select,
+textarea {
+    transition: all 0.2s ease;
+}
+
+.form-control:focus,
+.form-select:focus,
+textarea:focus {
+    border-color: var(--sw-primary);
+    box-shadow: 0 0 0 4px var(--sw-primary-light);
+}
+
+.input-error {
+    border-color: var(--sw-danger) !important;
+    animation: shake 0.4s ease;
+}
+
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-4px);
+    }
+
+    50% {
+        transform: translateX(4px);
+    }
+
+    75% {
+        transform: translateX(-4px);
+    }
+}
+
+/* Floating labels */
+.form-floating>label {
+    transition: transform 0.2s ease, opacity 0.2s ease, color 0.2s ease;
+}
+
+/* Status badge pop-in */
+.badge {
+    animation: badgePop 0.3s ease forwards;
+    will-change: transform;
+}
+
+@keyframes badgePop {
+    from {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Map Animations */
+.leaflet-container {
+    animation: mapFade 0.6s ease forwards;
+}
+
+@keyframes mapFade {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* Mobile Responsive Adjustments */
+@media (max-width: 767.98px) {
+
+    /* Navbar Smooth Dropdown via Bootstrap handled natively, but adding spacing */
+    .navbar-collapse {
+        background: rgba(10, 22, 40, 0.98);
+        padding: 1rem;
+        border-radius: var(--sw-radius);
+        margin-top: 10px;
+    }
+
+    .sw-navbar .nav-link {
+        width: 100%;
+        text-align: left;
+        margin-bottom: 4px;
+        padding: 10px 15px !important;
+    }
+
+    /* Dashboards: Tabs become scrollable */
+    .nav-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        border-bottom: 1px solid var(--sw-gray-200);
+        padding-bottom: 1px;
+    }
+
+    .nav-tabs .nav-item {
+        white-space: nowrap;
+    }
+
+    /* Cards Stack */
+    .row>.col-md-6,
+    .row>.col-md-4,
+    .row>.col-lg-3,
+    .row>.col-lg-8 {
+        width: 100%;
+        margin-bottom: 16px;
+    }
+
+    /* Order Detail Single Column */
+    .order-summary-mobile-bottom .col-md-8 {
+        order: 1;
+    }
+
+    .order-summary-mobile-bottom .col-md-4 {
+        order: 2;
+    }
+
+    /* Actions full width */
+    .btn-group-mobile>.btn {
+        width: 100%;
+        margin-bottom: 8px;
+    }
+
+    /* Table scrolling handled by .table-responsive wrapping */
+
+    /* Map full width min height */
+    #map,
+    .sw-map-container {
+        width: 100% !important;
+        min-height: 300px;
+        margin-top: 16px;
+    }
+
+    /* Auth Cards width */
+    .sw-auth-card {
+        margin: 0 16px;
+        width: calc(100% - 32px) !important;
+    }
+
+    /* Process Flow / Place Order Steps stack */
+    .sw-step-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    /* Receipt Columns stack */
+    .receipt-row {
+        flex-direction: column;
+    }
+
+    .print-btn-mobile {
+        width: 100%;
+        margin-top: 16px;
+    }
 }

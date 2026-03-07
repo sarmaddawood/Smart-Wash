@@ -1,0 +1,210 @@
+@using SmartWash.Models
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Order Detail";
+    var order = ViewBag.Order as Order;
+    var customer = ViewBag.Customer as Profile;
+    var service = ViewBag.Service as Service;
+    var detergent = ViewBag.Detergent as Detergent;
+    var warehouse = ViewBag.Warehouse as Warehouse;
+    var warehouses = ViewBag.Warehouses as List<Warehouse> ?? new List<Warehouse>();
+    var riderId = ViewBag.RiderId as string;
+}
+
+<div class="container-fluid py-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="mb-0">Order Detail</h1>
+        <a href="@Url.Action("Dashboard", "Rider")" class="btn btn-outline-secondary btn-sm">Back to Dashboard</a>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="card animate-stagger delay-1 p-3 h-100">
+                <h3 class="mb-3">Order Info</h3>
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label>Order ID</label>
+                        <div class="fw-bold">@order?.Id</div>
+                    </div>
+                    <div class="col-6">
+                        <label>Status</label>
+                        <div>
+                            <span class="badge bg-primary rounded-pill fs-12">@order?.Status</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label>Customer Details</label>
+                    <div class="fw-bold">@customer?.FullName</div>
+                    <div class="text-muted fs-12">@customer?.Email</div>
+                    <div class="text-muted fs-12">+63 @customer?.Phone</div>
+                </div>
+
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label>Service</label>
+                        <div class="fw-bold">@service?.Name</div>
+                    </div>
+                    <div class="col-6">
+                        <label>Detergent</label>
+                        <div class="fw-bold">@(detergent?.Name ?? "None")</div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label>Pickup Address</label>
+                    <div class="fs-12">@order?.PickupAddress</div>
+                </div>
+
+                <div class="mb-3">
+                    <label>Delivery Address</label>
+                    <div class="fs-12">@order?.DeliveryAddress</div>
+                </div>
+
+                <div class="mb-3">
+                    <label>Special Instructions</label>
+                    <div class="fs-12 text-muted italic">@(string.IsNullOrEmpty(order?.SpecialInstructions) ? "None" : order?.SpecialInstructions)</div>
+                </div>
+
+                <div class="row g-2">
+                    <div class="col-4">
+                        <label>Pickup Date</label>
+                        <div class="fs-12">@order?.PickupDate?.ToString("MMM dd, yyyy")</div>
+                    </div>
+                    <div class="col-4">
+                        <label>Weight</label>
+                        <div class="fs-12">@(order?.WeightKg.HasValue == true ? $"{order.WeightKg} kg" : "—")</div>
+                    </div>
+                    <div class="col-4">
+                        <label>Total Price</label>
+                        <div class="fw-bold text-primary">@(order?.TotalPrice.HasValue == true ? $"₱{order.TotalPrice:F2}" : "—")</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card animate-stagger delay-2 p-3 h-100">
+                <h3 class="mb-3">Actions</h3>
+                
+                @if (order?.Status == "Pending" && string.IsNullOrEmpty(order?.PickupRiderId))
+                {
+                    <form asp-action="AcceptPickup" method="post">
+                        <input type="hidden" name="id" value="@order?.Id" />
+                        <button type="submit" class="btn btn-primary w-100 fw-bold py-2 mb-3">Accept Pickup</button>
+                    </form>
+                }
+                else if (order?.Status == "Ready for Delivery" && string.IsNullOrEmpty(order?.DeliveryRiderId))
+                {
+                    <form asp-action="AcceptDelivery" method="post">
+                        <input type="hidden" name="id" value="@order?.Id" />
+                        <button type="submit" class="btn btn-primary w-100 fw-bold py-2 mb-3">Accept Delivery</button>
+                    </form>
+                }
+
+                @if ((order?.PickupRiderId == riderId && order?.Status == "Picked Up") || (order?.DeliveryRiderId == riderId && order?.Status == "Out for Delivery"))
+                {
+                    <div id="map" style="height: 300px; border-radius: 8px;" class="mb-3 border"></div>
+
+                    @if (order?.Status == "Picked Up")
+                    {
+                        <form asp-action="MarkAtWarehouse" method="post" class="mt-2">
+                            <input type="hidden" name="id" value="@order?.Id" />
+                            <div class="mb-3">
+                                <label for="warehouseId">Select Destination Warehouse</label>
+                                <select name="warehouseId" id="warehouseId" class="form-select form-select-sm" required>
+                                    <option value="">-- Select Warehouse --</option>
+                                    @foreach (var w in warehouses)
+                                    {
+                                        <option value="@w.Id" data-lat="@w.Lat" data-lng="@w.Lng">@w.Name (@w.Address)</option>
+                                    }
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100 fw-bold py-2">Mark Delivered to Warehouse</button>
+                        </form>
+                    }
+                    else if (order?.Status == "Out for Delivery")
+                    {
+                        <form asp-action="MarkDelivered" method="post" class="mt-2">
+                            <input type="hidden" name="id" value="@order?.Id" />
+                            <button type="submit" class="btn btn-success w-100 fw-bold py-2">Mark Delivered</button>
+                        </form>
+                    }
+                }
+                else if (!string.IsNullOrEmpty(order?.PickupRiderId) || !string.IsNullOrEmpty(order?.DeliveryRiderId))
+                {
+                     <div class="alert alert-info py-2 fs-12 mb-0">
+                         Job is already assigned to @(order.PickupRiderId == riderId || order.DeliveryRiderId == riderId ? "you" : "another rider").
+                         Current Status: <span class="fw-bold">@order.Status</span>
+                     </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var orderStatus = "@order?.Status";
+            var mapElement = document.getElementById('map');
+            
+            if (mapElement) {
+                var map = L.map('map').setView([@(order?.PickupLat ?? 14.5995), @(order?.PickupLng ?? 120.9842)], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+                var customerIcon = L.icon({
+                    iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                    iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+                });
+
+                var warehouseIcon = L.icon({
+                    iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                    iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+                });
+
+                var pLat = @(order?.PickupLat ?? 14.5995);
+                var pLng = @(order?.PickupLng ?? 120.9842);
+                var dLat = @(order?.DeliveryLat ?? 14.5995);
+                var dLng = @(order?.DeliveryLng ?? 120.9842);
+                
+                var customerMarker = L.marker([pLat, pLng], {icon: customerIcon}).addTo(map).bindPopup("Pickup Address");
+                var routeLine;
+
+                if (orderStatus === "Picked Up") {
+                    var whSelect = document.getElementById('warehouseId');
+                    whSelect.addEventListener('change', function() {
+                        var option = this.options[this.selectedIndex];
+                        if (option.value) {
+                            var wLat = parseFloat(option.getAttribute('data-lat'));
+                            var wLng = parseFloat(option.getAttribute('data-lng'));
+                            
+                            if (routeLine) map.removeLayer(routeLine);
+                            
+                            var wMarker = L.marker([wLat, wLng], {icon: warehouseIcon}).addTo(map).bindPopup(option.text);
+                            routeLine = L.polyline([[pLat, pLng], [wLat, wLng]], {color: 'blue', weight: 3, opacity: 0.7, dashArray: '5, 5'}).addTo(map);
+                            
+                            var group = new L.featureGroup([customerMarker, wMarker]);
+                            map.fitBounds(group.getBounds(), {padding: [50, 50]});
+                        }
+                    });
+                } else if (orderStatus === "Out for Delivery") {
+                    @if (warehouse != null) {
+                        <text>
+                        var wLat = @warehouse.Lat;
+                        var wLng = @warehouse.Lng;
+                        var wMarker = L.marker([wLat, wLng], {icon: warehouseIcon}).addTo(map).bindPopup("Warehouse: @warehouse.Name");
+                        var deliveryMarker = L.marker([dLat, dLng], {icon: customerIcon}).addTo(map).bindPopup("Delivery Address");
+                        routeLine = L.polyline([[wLat, wLng], [dLat, dLng]], {color: 'green', weight: 3, opacity: 0.7, dashArray: '5, 5'}).addTo(map);
+                        var group = new L.featureGroup([wMarker, deliveryMarker]);
+                        map.fitBounds(group.getBounds(), {padding: [50, 50]});
+                        </text>
+                    }
+                }
+            }
+        });
+    </script>
+}

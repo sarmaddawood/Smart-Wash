@@ -10,12 +10,41 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet" />
     <link href="/css/site.css" rel="stylesheet" />
+    <style>
+        .sw-profile-trigger{display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px 10px;border-radius:50px;transition:background .2s;}
+        .sw-profile-trigger:hover{background:rgba(255,255,255,0.1);}
+        .sw-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.78rem;color:#fff;background:linear-gradient(135deg,#2563EB,#60a5fa);flex-shrink:0;letter-spacing:0.5px;}
+        .sw-profile-panel{position:absolute;top:calc(100% + 8px);right:0;width:260px;background:#fff;border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,0.15);opacity:0;visibility:hidden;transform:translateY(-8px);transition:opacity .25s ease,transform .25s ease,visibility .25s;z-index:1060;overflow:hidden;}
+        .sw-profile-panel.show{opacity:1;visibility:visible;transform:translateY(0);}
+        .sw-profile-panel-header{padding:20px 20px 16px;text-align:center;background:linear-gradient(135deg,#f8faff,#eef2ff);}
+        .sw-profile-panel-header .sw-avatar{width:52px;height:52px;font-size:1.1rem;margin:0 auto 10px;}
+        .sw-role-pill{display:inline-block;padding:3px 12px;border-radius:50px;font-size:0.68rem;font-weight:600;text-transform:capitalize;}
+        .sw-role-customer{background:#dbeafe;color:#1e40af;}
+        .sw-role-admin{background:#fce7f3;color:#9d174d;}
+        .sw-role-staff{background:#d1fae5;color:#065f46;}
+        .sw-role-rider{background:#fef3c7;color:#92400e;}
+        .sw-profile-panel-link{display:flex;align-items:center;gap:10px;padding:11px 20px;font-size:0.88rem;color:#334155;text-decoration:none;transition:background .15s;}
+        .sw-profile-panel-link:hover{background:#f8fafc;color:#2563EB;}
+        .sw-profile-panel-link.danger{color:#dc2626;}
+        .sw-profile-panel-link.danger:hover{background:#fef2f2;}
+        .sw-chevron{transition:transform .25s;font-size:0.7rem;}
+        .sw-profile-panel.show ~ .sw-chevron,.sw-profile-wrapper.open .sw-chevron{transform:rotate(180deg);}
+    </style>
 </head>
 <body>
     @{
         var userName = Context.Session.GetString("UserName");
         var userRole = Context.Session.GetString("UserRole");
+        var userEmail = Context.Session.GetString("UserEmail");
         var isLoggedIn = !string.IsNullOrEmpty(userName);
+        var initials = "";
+        if (isLoggedIn && !string.IsNullOrEmpty(userName))
+        {
+            var parts = userName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            initials = parts.Length >= 2
+                ? (parts[0][0].ToString() + parts[parts.Length - 1][0].ToString()).ToUpper()
+                : (parts.Length == 1 ? parts[0][0].ToString().ToUpper() : "U");
+        }
     }
 
     <nav class="navbar navbar-expand-lg sw-navbar fixed-top" id="mainNav">
@@ -30,8 +59,6 @@
             <div class="collapse navbar-collapse" id="navMenu">
                 <ul class="navbar-nav ms-auto align-items-lg-center gap-1">
                     <li class="nav-item"><a class="nav-link" href="/"><i class="bi bi-house me-1"></i>Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/#services">Services</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/#how-it-works">How It Works</a></li>
                     @if (isLoggedIn)
                     {
                         @if (userRole == "customer")
@@ -51,22 +78,43 @@
                         {
                             <li class="nav-item"><a class="nav-link" href="/Admin/Dashboard"><i class="bi bi-shield-check me-1"></i>Admin</a></li>
                         }
-                        <li class="nav-item"><a class="nav-link" href="/Auth/Logout"><i class="bi bi-box-arrow-right me-1"></i>Logout</a></li>
+                        <li class="nav-item position-relative" id="profileWrapper">
+                            <div class="sw-profile-trigger" onclick="toggleProfilePanel(event)">
+                                <div class="sw-avatar">@initials</div>
+                                <span class="d-none d-lg-inline text-white fw-medium" style="font-size:0.88rem;">@userName</span>
+                                <i class="bi bi-chevron-down text-white-50 sw-chevron"></i>
+                            </div>
+                            <div class="sw-profile-panel" id="profilePanel">
+                                <div class="sw-profile-panel-header">
+                                    <div class="sw-avatar">@initials</div>
+                                    <div class="fw-bold" style="font-size:0.95rem;">@userName</div>
+                                    <span class="sw-role-pill sw-role-@userRole">@userRole</span>
+                                    <div class="text-muted mt-1" style="font-size:0.75rem;">@userEmail</div>
+                                </div>
+                                <div style="padding:6px 0;">
+                                    <a href="/Profile/Edit" class="sw-profile-panel-link"><i class="bi bi-pencil-square text-primary"></i>Edit Profile</a>
+                                    <hr class="my-1 mx-3" />
+                                    <a href="/Auth/Logout" class="sw-profile-panel-link danger"><i class="bi bi-box-arrow-right"></i>Logout</a>
+                                </div>
+                            </div>
+                        </li>
                     }
                     else
                     {
+                        <li class="nav-item"><a class="nav-link" href="/#services">Services</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/#how-it-works">How It Works</a></li>
                         <li class="nav-item"><a class="nav-link" href="/Auth/Login"><i class="bi bi-person me-1"></i>Login</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/Auth/Register"><i class="bi bi-person-plus me-1"></i>Register</a></li>
                     }
-                    <li class="nav-item ms-lg-2">
-                        <a class="nav-link sw-cta-btn" href="/Order/Place"><i class="bi bi-basket-fill me-1"></i>Book Now</a>
-                    </li>
                 </ul>
             </div>
         </div>
     </nav>
 
     <main style="padding-top:66px;">
-        @RenderBody()
+        <div class="page-wrapper container-fluid p-0">
+            @RenderBody()
+        </div>
     </main>
 
     <footer class="sw-footer">
@@ -90,7 +138,6 @@
                     <a href="/" class="sw-footer-link">Home</a>
                     <a href="/#services" class="sw-footer-link">Services</a>
                     <a href="/#how-it-works" class="sw-footer-link">How It Works</a>
-                    <a href="/Order/Place" class="sw-footer-link">Book Now</a>
                 </div>
                 <div class="col-lg-3 col-md-6">
                     <h6 class="sw-footer-title">Our Services</h6>
@@ -122,6 +169,23 @@
             var nav = document.getElementById('mainNav');
             if (window.scrollY > 50) nav.classList.add('scrolled');
             else nav.classList.remove('scrolled');
+        });
+
+        function toggleProfilePanel(e) {
+            e.stopPropagation();
+            var panel = document.getElementById('profilePanel');
+            var wrapper = document.getElementById('profileWrapper');
+            panel.classList.toggle('show');
+            wrapper.classList.toggle('open');
+        }
+
+        document.addEventListener('click', function (e) {
+            var panel = document.getElementById('profilePanel');
+            var wrapper = document.getElementById('profileWrapper');
+            if (panel && wrapper && !wrapper.contains(e.target)) {
+                panel.classList.remove('show');
+                wrapper.classList.remove('open');
+            }
         });
     </script>
     @RenderSection("Scripts", required: false)

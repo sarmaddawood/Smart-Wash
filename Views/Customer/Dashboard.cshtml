@@ -2,11 +2,12 @@
     ViewData["Title"] = "Customer Dashboard";
     var activeOrders = ViewBag.ActiveOrders as List<SmartWash.Models.Order> ?? new List<SmartWash.Models.Order>();
     var allOrders = ViewBag.AllOrders as List<SmartWash.Models.Order> ?? new List<SmartWash.Models.Order>();
-    var serviceDict = ViewBag.ServiceDict as Dictionary<long, string> ?? new Dictionary<long, string>();
-    var reviewedOrderIds = ViewBag.ReviewedOrderIds as HashSet<long> ?? new HashSet<long>();
+    var serviceDict = ViewBag.ServiceDict as Dictionary<string, string> ?? new Dictionary<string, string>();
+    var detergentDict = ViewBag.DetergentDict as Dictionary<string, string> ?? new Dictionary<string, string>();
+    var reviewedOrderIds = ViewBag.ReviewedOrderIds as HashSet<string> ?? new HashSet<string>();
     var userName = ViewBag.UserName as string ?? "";
     var completedCount = allOrders.Count(o => o.Status == "Delivered");
-    var totalSpent = allOrders.Where(o => o.Status == "Delivered").Sum(o => o.TotalPrice);
+    var totalSpent = allOrders.Where(o => o.Status == "Delivered").Sum(o => o.TotalPrice ?? 0m);
 }
 
 <div class="sw-page-header">
@@ -26,28 +27,28 @@
 <div class="container py-4">
     <div class="row g-3 mb-4">
         <div class="col-6 col-lg-3">
-            <div class="sw-stat-card p-3 text-center">
+            <div class="sw-stat-card animate-stagger delay-1 p-3 text-center">
                 <i class="bi bi-receipt fs-3 text-primary"></i>
                 <h4 class="fw-bold mt-1 mb-0">@allOrders.Count</h4>
                 <p class="text-muted small mb-0">Total Orders</p>
             </div>
         </div>
         <div class="col-6 col-lg-3">
-            <div class="sw-stat-card p-3 text-center">
+            <div class="sw-stat-card animate-stagger delay-2 p-3 text-center">
                 <i class="bi bi-lightning-charge-fill fs-3 text-warning"></i>
                 <h4 class="fw-bold mt-1 mb-0">@activeOrders.Count</h4>
                 <p class="text-muted small mb-0">Active</p>
             </div>
         </div>
         <div class="col-6 col-lg-3">
-            <div class="sw-stat-card p-3 text-center">
+            <div class="sw-stat-card animate-stagger delay-3 p-3 text-center">
                 <i class="bi bi-check-circle-fill fs-3" style="color:var(--sw-success);"></i>
                 <h4 class="fw-bold mt-1 mb-0">@completedCount</h4>
                 <p class="text-muted small mb-0">Completed</p>
             </div>
         </div>
         <div class="col-6 col-lg-3">
-            <div class="sw-stat-card p-3 text-center">
+            <div class="sw-stat-card animate-stagger delay-4 p-3 text-center">
                 <i class="bi bi-currency-exchange fs-3" style="color:var(--sw-success);"></i>
                 <h4 class="fw-bold mt-1 mb-0">₱@totalSpent.ToString("N2")</h4>
                 <p class="text-muted small mb-0">Total Spent</p>
@@ -61,25 +62,26 @@
         <div class="row g-3 mb-4">
             @foreach (var o in activeOrders)
             {
+                var svcName = !string.IsNullOrEmpty(o.ServiceId) && serviceDict.ContainsKey(o.ServiceId) ? serviceDict[o.ServiceId] : "—";
+                var detName = !string.IsNullOrEmpty(o.DetergentId) && detergentDict.ContainsKey(o.DetergentId) ? detergentDict[o.DetergentId] : "—";
+                var weighedStatuses = new[] { "Weighed & Measured", "Washing", "Ready for Delivery", "Out for Delivery" };
+                var isWeighed = weighedStatuses.Contains(o.Status);
                 <div class="col-md-6 col-lg-4">
-                    <div class="sw-card h-100">
+                    <div class="sw-card animate-stagger delay-5 h-100">
                         <div class="p-4">
                             <div class="d-flex justify-content-between align-items-start mb-3">
                                 <h6 class="fw-bold mb-0">#@o.Id</h6>
                                 <span class="sw-status-badge sw-status-@o.Status.Replace(" ", "-").ToLower()">@o.Status</span>
                             </div>
-                            <p class="small text-muted mb-1">
-                                <i class="bi bi-stars me-1"></i>@(serviceDict.ContainsKey(o.ServiceId) ? serviceDict[o.ServiceId] : "—")
-                            </p>
+                            <p class="small text-muted mb-1"><i class="bi bi-stars me-1"></i>@svcName</p>
+                            <p class="small text-muted mb-1"><i class="bi bi-droplet me-1"></i>@detName</p>
                             <p class="small text-muted mb-3">
-                                <i class="bi bi-box me-1"></i>@o.WeightKg kg • <span class="fw-bold text-primary">₱@o.TotalPrice.ToString("F2")</span>
+                                <i class="bi bi-box me-1"></i>@(isWeighed && o.WeightKg.HasValue ? o.WeightKg.Value.ToString("F1") + " kg" : "—") •
+                                <span class="fw-bold text-primary">@(isWeighed && o.TotalPrice.HasValue ? "₱" + o.TotalPrice.Value.ToString("F2") : "—")</span>
                             </p>
                             <div class="d-flex gap-2">
                                 <a href="/Order/Track/@o.Id" class="sw-btn sw-btn-primary flex-fill" style="min-height:36px;padding:6px 12px;font-size:0.85rem;">
                                     <i class="bi bi-geo-alt"></i> Track
-                                </a>
-                                <a href="/Order/Receipt/@o.Id" class="btn btn-sm btn-outline-primary" style="border-radius:var(--sw-radius-sm);min-height:36px;">
-                                    <i class="bi bi-receipt"></i>
                                 </a>
                                 @if (o.Status == "Pending")
                                 {
@@ -99,7 +101,7 @@
     }
     else
     {
-        <div class="sw-card mb-4">
+        <div class="sw-card animate-stagger delay-5 mb-4">
             <div class="sw-empty-state">
                 <i class="bi bi-basket"></i>
                 <p>No active orders right now</p>
@@ -112,35 +114,38 @@
         <h5 class="fw-bold mb-0"><i class="bi bi-clock-history text-primary me-2"></i>Recent Orders</h5>
         <a href="/Order/History" class="btn btn-sm btn-outline-primary" style="border-radius:var(--sw-radius-sm);">View All</a>
     </div>
-    <div class="sw-card">
+    <div class="sw-card animate-stagger delay-6">
         <div class="p-4">
             <div class="table-responsive">
                 <table class="sw-table">
                     <thead>
-                        <tr><th>ID</th><th>Service</th><th>Weight</th><th>Total</th><th>Status</th><th>Date</th><th></th></tr>
+                        <tr><th>ID</th><th>Service</th><th>Detergent</th><th>Weight</th><th>Total</th><th>Status</th><th>Date</th><th></th></tr>
                     </thead>
                     <tbody>
                         @foreach (var o in allOrders.Take(10))
                         {
+                            var svcName = !string.IsNullOrEmpty(o.ServiceId) && serviceDict.ContainsKey(o.ServiceId) ? serviceDict[o.ServiceId] : "—";
+                            var detName = !string.IsNullOrEmpty(o.DetergentId) && detergentDict.ContainsKey(o.DetergentId) ? detergentDict[o.DetergentId] : "—";
                             <tr>
                                 <td class="fw-bold">#@o.Id</td>
-                                <td>@(serviceDict.ContainsKey(o.ServiceId) ? serviceDict[o.ServiceId] : "—")</td>
-                                <td>@o.WeightKg kg</td>
-                                <td class="fw-bold text-primary">₱@o.TotalPrice.ToString("F2")</td>
+                                <td>@svcName</td>
+                                <td class="small">@detName</td>
+                                <td>@(o.WeightKg.HasValue ? o.WeightKg.Value.ToString("F1") + " kg" : "—")</td>
+                                <td class="fw-bold text-primary">@(o.TotalPrice.HasValue ? "₱" + o.TotalPrice.Value.ToString("F2") : "—")</td>
                                 <td><span class="sw-status-badge sw-status-@o.Status.Replace(" ", "-").ToLower()">@o.Status</span></td>
-                                <td class="small">@o.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                <td class="small">@(o.CreatedAt.HasValue ? o.CreatedAt.Value.ToString("MMM dd, yyyy") : "—")</td>
                                 <td>
                                     <div class="d-flex gap-1">
                                         <a href="/Order/Track/@o.Id" class="btn btn-sm btn-outline-primary" style="border-radius:var(--sw-radius-sm);"><i class="bi bi-eye"></i></a>
                                         @if (o.Status == "Delivered" && !reviewedOrderIds.Contains(o.Id))
                                         {
-                                            <button class="btn btn-sm btn-outline-warning" style="border-radius:var(--sw-radius-sm);" data-bs-toggle="modal" data-bs-target="#reviewModal" onclick="setReviewOrder(@o.Id)">
+                                            <button class="btn btn-sm btn-outline-warning" style="border-radius:var(--sw-radius-sm);" data-bs-toggle="modal" data-bs-target="#reviewModal" onclick="setReviewOrder('@o.Id')">
                                                 <i class="bi bi-star"></i>
                                             </button>
                                         }
                                         @if (o.Status == "Delivered" && reviewedOrderIds.Contains(o.Id))
                                         {
-                                            <button class="btn btn-sm btn-warning text-white" style="border-radius:var(--sw-radius-sm);" onclick="viewReview(@o.Id)">
+                                            <button class="btn btn-sm btn-warning text-white" style="border-radius:var(--sw-radius-sm);" onclick="viewReview('@o.Id')">
                                                 <i class="bi bi-star-fill"></i>
                                             </button>
                                         }
@@ -185,7 +190,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold small">Comment (optional)</label>
-                        <textarea name="comment" class="form-control sw-input" rows="3" placeholder="Tell us about your experience..."></textarea>
+                        <textarea name="comment" class="form-control sw-input" rows="3" maxlength="300" placeholder="Tell us about your experience..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer border-0 pt-0">

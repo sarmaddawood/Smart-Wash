@@ -1,134 +1,107 @@
 @{
+    Layout = "_Layout";
     ViewData["Title"] = "Staff Dashboard";
-    var orders = ViewBag.Orders as List<SmartWash.Models.Order> ?? new List<SmartWash.Models.Order>();
-    var serviceDict = ViewBag.ServiceDict as Dictionary<long, string> ?? new Dictionary<long, string>();
+    var availableOrders = ViewBag.AvailableOrders as List<SmartWash.Models.Order> ?? new List<SmartWash.Models.Order>();
+    var activeOrders = ViewBag.MyActiveOrders as List<SmartWash.Models.Order> ?? new List<SmartWash.Models.Order>();
+    var serviceDict = ViewBag.ServiceDict as Dictionary<string, string> ?? new Dictionary<string, string>();
+    var detergentDict = ViewBag.DetergentDict as Dictionary<string, string> ?? new Dictionary<string, string>();
     var profileDict = ViewBag.ProfileDict as Dictionary<string, SmartWash.Models.Profile> ?? new Dictionary<string, SmartWash.Models.Profile>();
-    var warehouseDict = ViewBag.WarehouseDict as Dictionary<long, SmartWash.Models.Warehouse> ?? new Dictionary<long, SmartWash.Models.Warehouse>();
-    var userName = ViewBag.UserName as string ?? "";
 }
 
-<div class="sw-page-header">
-    <div class="container">
-        <div class="d-flex flex-wrap justify-content-between align-items-center">
-            <div>
-                <h2 class="fw-bold text-white mb-1"><i class="bi bi-water me-2"></i>Staff Dashboard</h2>
-                <p class="text-white-50 mb-0">Welcome, @userName — manage warehouse laundry orders 🫧</p>
-            </div>
-            <span class="sw-live-badge">Live • auto-refresh</span>
-        </div>
-    </div>
-</div>
-
-<div class="container py-4">
-    <div class="row g-3 mb-4">
-        <div class="col-md-4">
-            <div class="sw-stat-card p-3 text-center" style="border-top:3px solid var(--sw-purple);">
-                <i class="bi bi-building fs-3" style="color:var(--sw-purple);"></i>
-                <h3 class="fw-bold mt-1 mb-0">@orders.Count(o => o.Status == "At Warehouse")</h3>
-                <p class="text-muted small mb-0">At Warehouse</p>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="sw-stat-card p-3 text-center" style="border-top:3px solid var(--sw-info);">
-                <i class="bi bi-water fs-3" style="color:var(--sw-info);"></i>
-                <h3 class="fw-bold mt-1 mb-0">@orders.Count(o => o.Status == "Washing")</h3>
-                <p class="text-muted small mb-0">Washing</p>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="sw-stat-card p-3 text-center" style="border-top:3px solid var(--sw-success);">
-                <i class="bi bi-stars fs-3" style="color:var(--sw-success);"></i>
-                <h3 class="fw-bold mt-1 mb-0">@orders.Count(o => o.Status == "Ready for Delivery")</h3>
-                <p class="text-muted small mb-0">Ready for Delivery</p>
-            </div>
-        </div>
+<div class="container-fluid py-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="mb-0">Staff Dashboard</h1>
+        <div class="text-muted fs-12">Welcome, @ViewBag.UserName</div>
     </div>
 
-    <div class="sw-card mb-4">
-        <div class="p-3">
-            <div id="staffMap" style="height:280px;border-radius:var(--sw-radius-sm);"></div>
-        </div>
-    </div>
-
-    <h5 class="fw-bold mb-3"><i class="bi bi-list-task text-primary me-2"></i>Order Queue (@orders.Count)</h5>
-
-    @if (orders.Any())
-    {
-        <div class="row g-3">
-            @foreach (var o in orders)
-            {
-                var customer = profileDict.ContainsKey(o.CustomerId) ? profileDict[o.CustomerId] : null;
-                var warehouse = o.WarehouseId.HasValue && warehouseDict.ContainsKey(o.WarehouseId.Value) ? warehouseDict[o.WarehouseId.Value] : null;
-                <div class="col-md-6 col-lg-4">
-                    <div class="sw-card h-100">
-                        <div class="p-4">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h6 class="fw-bold mb-0">Order #@o.Id</h6>
-                                <span class="sw-status-badge sw-status-@o.Status.Replace(" ", "-").ToLower()">@o.Status</span>
-                            </div>
-                            <p class="small text-muted mb-1"><i class="bi bi-stars me-1"></i>@(serviceDict.ContainsKey(o.ServiceId) ? serviceDict[o.ServiceId] : "—") • @o.WeightKg kg</p>
-                            <p class="small mb-1"><span class="text-primary fw-bold">₱@o.TotalPrice.ToString("F2")</span></p>
-                            @if (customer != null)
+    <div class="card animate-stagger delay-1 p-3 mb-4">
+        <ul class="nav nav-tabs mb-3" id="staffTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active fs-12 fw-bold text-uppercase" id="available-tab" data-bs-toggle="tab" data-bs-target="#available" type="button" role="tab">Available Orders</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fs-12 fw-bold text-uppercase" id="active-tab" data-bs-toggle="tab" data-bs-target="#active" type="button" role="tab">My Active Orders</button>
+            </li>
+        </ul>
+        <div class="tab-content" id="staffTabsContent">
+            <div class="tab-pane fade show active" id="available" role="tabpanel">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover text-nowrap mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="fs-12 text-muted text-uppercase">Order ID</th>
+                                <th class="fs-12 text-muted text-uppercase">Customer</th>
+                                <th class="fs-12 text-muted text-uppercase">Service</th>
+                                <th class="fs-12 text-muted text-uppercase">Detergent</th>
+                                <th class="fs-12 text-muted text-uppercase">Pickup Address</th>
+                                <th class="fs-12 text-muted text-uppercase">Date</th>
+                                <th class="fs-12 text-muted text-uppercase">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var order in availableOrders)
                             {
-                                <p class="small text-muted mb-1"><i class="bi bi-person me-1"></i>@customer.FullName</p>
-                                <p class="small text-muted mb-1"><i class="bi bi-telephone me-1"></i>+63 @customer.Phone</p>
+                                var customer = profileDict.ContainsKey(order.CustomerId ?? "") ? profileDict[order.CustomerId!] : null;
+                                <tr>
+                                    <td class="text-truncate" style="max-width: 80px;">@order.Id</td>
+                                    <td>@(customer?.FullName ?? "Unknown")</td>
+                                    <td>@(serviceDict.ContainsKey(order.ServiceId ?? "") ? serviceDict[order.ServiceId!] : "Unknown")</td>
+                                    <td>@(detergentDict.ContainsKey(order.DetergentId ?? "") ? detergentDict[order.DetergentId!] : "None")</td>
+                                    <td class="text-truncate" style="max-width: 150px;">@order.PickupAddress</td>
+                                    <td>@order.PickupDate?.ToString("MMM dd")</td>
+                                    <td>
+                                        <a href="@Url.Action("OrderDetail", "Staff", new { id = order.Id })" class="btn btn-primary btn-sm">View & Accept</a>
+                                    </td>
+                                </tr>
                             }
-                            @if (warehouse != null)
+                            @if (!availableOrders.Any())
                             {
-                                <p class="small text-muted mb-2"><i class="bi bi-building text-primary me-1"></i>@warehouse.Name</p>
+                                <tr><td colspan="7" class="text-center py-3 text-muted">No orders waiting for staff.</td></tr>
                             }
-
-                            @if (o.Status == "At Warehouse")
-                            {
-                                <form method="post" action="/Staff/UpdateStatus">
-                                    <input type="hidden" name="id" value="@o.Id" />
-                                    <input type="hidden" name="status" value="Washing" />
-                                    <button type="submit" class="sw-btn w-100" style="background:var(--sw-info);color:#fff;min-height:44px;">
-                                        <i class="bi bi-water me-1"></i>Start Washing
-                                    </button>
-                                </form>
-                            }
-                            @if (o.Status == "Washing")
-                            {
-                                <form method="post" action="/Staff/UpdateStatus">
-                                    <input type="hidden" name="id" value="@o.Id" />
-                                    <input type="hidden" name="status" value="Ready for Delivery" />
-                                    <button type="submit" class="sw-btn w-100" style="background:var(--sw-success);color:#fff;min-height:44px;">
-                                        <i class="bi bi-check-circle me-1"></i>Mark Ready for Delivery
-                                    </button>
-                                </form>
-                            }
-                        </div>
-                    </div>
+                        </tbody>
+                    </table>
                 </div>
-            }
+            </div>
+            <div class="tab-pane fade" id="active" role="tabpanel">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover text-nowrap mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="fs-12 text-muted text-uppercase">Order ID</th>
+                                <th class="fs-12 text-muted text-uppercase">Customer</th>
+                                <th class="fs-12 text-muted text-uppercase">Service</th>
+                                <th class="fs-12 text-muted text-uppercase">Weight</th>
+                                <th class="fs-12 text-muted text-uppercase">Total</th>
+                                <th class="fs-12 text-muted text-uppercase">Status</th>
+                                <th class="fs-12 text-muted text-uppercase">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var order in activeOrders)
+                            {
+                                var customer = profileDict.ContainsKey(order.CustomerId ?? "") ? profileDict[order.CustomerId!] : null;
+                                <tr>
+                                    <td class="text-truncate" style="max-width: 80px;">@order.Id</td>
+                                    <td>@(customer?.FullName ?? "Unknown")</td>
+                                    <td>@(serviceDict.ContainsKey(order.ServiceId ?? "") ? serviceDict[order.ServiceId!] : "Unknown")</td>
+                                    <td>@(order.WeightKg.HasValue ? $"{order.WeightKg}kg" : "—")</td>
+                                    <td class="fw-bold">@(order.TotalPrice.HasValue ? $"₱{order.TotalPrice:F2}" : "—")</td>
+                                    <td>
+                                        <span class="badge bg-secondary rounded-pill fs-12">@order.Status</span>
+                                    </td>
+                                    <td>
+                                        <a href="@Url.Action("OrderDetail", "Staff", new { id = order.Id })" class="btn btn-outline-primary btn-sm">Manage</a>
+                                    </td>
+                                </tr>
+                            }
+                            @if (!activeOrders.Any())
+                            {
+                                <tr><td colspan="7" class="text-center py-3 text-muted">You have no active orders.</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-    }
-    else
-    {
-        <div class="sw-card"><div class="sw-empty-state"><i class="bi bi-inbox"></i><p>No assigned orders in your queue</p></div></div>
-    }
+    </div>
 </div>
-
-@section Scripts {
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var map = L.map('staffMap').setView([12.8797, 121.7740], 6);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
-        var orders = [
-            @foreach (var o in orders)
-            {
-                <text>{ id: @o.Id, lat: @o.PickupLat, lng: @o.PickupLng, service: '@(serviceDict.ContainsKey(o.ServiceId) ? serviceDict[o.ServiceId] : "")', weight: @o.WeightKg, status: '@o.Status' },</text>
-            }
-        ];
-        var bounds = [];
-        orders.forEach(function (o) {
-            var icon = L.divIcon({ html: '<i class="bi bi-geo-alt-fill text-danger fs-4"></i>', className: 'sw-map-icon', iconSize: [24, 24] });
-            L.marker([o.lat, o.lng], { icon: icon }).addTo(map)
-                .bindPopup('<strong>Order #' + o.id + '</strong><br>' + o.service + ' • ' + o.weight + 'kg<br><span class="badge bg-primary">' + o.status + '</span>');
-            bounds.push([o.lat, o.lng]);
-        });
-        if (bounds.length > 0) map.fitBounds(bounds, { padding: [30, 30] });
-    });
-</script>
-}

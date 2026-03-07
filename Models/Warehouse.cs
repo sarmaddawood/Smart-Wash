@@ -7,13 +7,13 @@ namespace SmartWash.Models
     public class Warehouse : BaseModel
     {
         [PrimaryKey("id")]
-        public long Id { get; set; }
+        public string Id { get; set; } = string.Empty;
 
         [Column("name")]
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         [Column("address")]
-        public string Address { get; set; }
+        public string Address { get; set; } = string.Empty;
 
         [Column("lat")]
         public double Lat { get; set; }

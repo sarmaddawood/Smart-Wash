@@ -1,17 +1,20 @@
 @{
     ViewData["Title"] = "Admin Dashboard";
     var orders = ViewBag.Orders as List<SmartWash.Models.Order> ?? new List<SmartWash.Models.Order>();
-    var serviceDict = ViewBag.ServiceDict as Dictionary<long, string> ?? new Dictionary<long, string>();
+    var serviceDict = ViewBag.ServiceDict as Dictionary<string, string> ?? new Dictionary<string, string>();
+    var services = ViewBag.Services as List<SmartWash.Models.Service> ?? new List<SmartWash.Models.Service>();
+    var detergentDict = ViewBag.DetergentDict as Dictionary<string, string> ?? new Dictionary<string, string>();
+    var detergents = ViewBag.Detergents as List<SmartWash.Models.Detergent> ?? new List<SmartWash.Models.Detergent>();
     var profileDict = ViewBag.ProfileDict as Dictionary<string, SmartWash.Models.Profile> ?? new Dictionary<string, SmartWash.Models.Profile>();
-    var roleDict = ViewBag.RoleDict as Dictionary<long, string> ?? new Dictionary<long, string>();
+    var roleDict = ViewBag.RoleDict as Dictionary<string, string> ?? new Dictionary<string, string>();
     var warehouses = ViewBag.Warehouses as List<SmartWash.Models.Warehouse> ?? new List<SmartWash.Models.Warehouse>();
     var activeWarehouses = ViewBag.ActiveWarehouses as List<SmartWash.Models.Warehouse> ?? new List<SmartWash.Models.Warehouse>();
     var staffList = ViewBag.StaffList as List<SmartWash.Models.Profile> ?? new List<SmartWash.Models.Profile>();
     var riderList = ViewBag.RiderList as List<SmartWash.Models.Profile> ?? new List<SmartWash.Models.Profile>();
     var customerList = ViewBag.CustomerList as List<SmartWash.Models.Profile> ?? new List<SmartWash.Models.Profile>();
-    var totalRevenue = (double)(ViewBag.TotalRevenue ?? 0.0);
+    var totalRevenue = (decimal)(ViewBag.TotalRevenue ?? 0m);
     var announcements = ViewBag.Announcements as List<SmartWash.Models.Announcement> ?? new List<SmartWash.Models.Announcement>();
-    var reviewDict = ViewBag.ReviewDict as Dictionary<long, SmartWash.Models.Review> ?? new Dictionary<long, SmartWash.Models.Review>();
+    var reviewDict = ViewBag.ReviewDict as Dictionary<string, SmartWash.Models.Review> ?? new Dictionary<string, SmartWash.Models.Review>();
     var userName = ViewBag.UserName as string ?? "";
     var pendingCount = orders.Count(o => o.Status == "Pending");
     var inProgress = orders.Count(o => o.Status != "Pending" && o.Status != "Delivered" && o.Status != "Cancelled");
@@ -20,85 +23,91 @@
 
 <div class="sw-page-header">
     <div class="container">
-        <div class="d-flex flex-wrap justify-content-between align-items-center">
-            <div>
-                <h2 class="fw-bold text-white mb-1"><i class="bi bi-shield-check me-2"></i>Admin Dashboard</h2>
-                <p class="text-white-50 mb-0">Welcome, @userName — full control panel</p>
-            </div>
-            <div class="d-flex gap-2 flex-wrap">
-                <a href="/Admin/Services" class="sw-btn sw-btn-outline" style="min-height:36px;padding:6px 16px;font-size:0.82rem;"><i class="bi bi-stars me-1"></i>Services</a>
-                <a href="/Admin/Warehouses" class="sw-btn sw-btn-outline" style="min-height:36px;padding:6px 16px;font-size:0.82rem;"><i class="bi bi-building me-1"></i>Warehouses</a>
-                <a href="/Admin/CreateAccount" class="sw-btn sw-btn-outline" style="min-height:36px;padding:6px 16px;font-size:0.82rem;"><i class="bi bi-person-plus me-1"></i>New Account</a>
-            </div>
-        </div>
+        <h2 class="fw-bold text-white mb-1"><i class="bi bi-shield-check me-2"></i>Admin Dashboard</h2>
+        <p class="text-white-50 mb-0">Welcome, @userName — full control panel</p>
     </div>
 </div>
 
 <div class="d-flex">
     <div class="sw-admin-sidebar d-none d-lg-block">
         <div class="px-4 mb-3"><span class="small fw-bold text-muted text-uppercase" style="letter-spacing:1px;">Navigation</span></div>
-        <a href="#adminStats" class="sw-sidebar-link active" onclick="showSection('stats')"><i class="bi bi-speedometer2"></i>Dashboard</a>
-        <a href="#adminOrders" class="sw-sidebar-link" onclick="showSection('orders')"><i class="bi bi-receipt"></i>Orders</a>
-        <a href="#adminAnnouncements" class="sw-sidebar-link" onclick="showSection('announcements')"><i class="bi bi-megaphone"></i>Announcements</a>
-        <a href="#adminCustomers" class="sw-sidebar-link" onclick="showSection('customers')"><i class="bi bi-people"></i>Customers</a>
-        <a href="#adminStaff" class="sw-sidebar-link" onclick="showSection('staff')"><i class="bi bi-person-badge"></i>Staff</a>
-        <a href="#adminRiders" class="sw-sidebar-link" onclick="showSection('riders')"><i class="bi bi-bicycle"></i>Riders</a>
-        <a href="#adminWarehouses" class="sw-sidebar-link" onclick="showSection('warehouses')"><i class="bi bi-building"></i>Warehouses</a>
+        <a class="sw-sidebar-link active" onclick="showSection('stats',this)"><i class="bi bi-speedometer2"></i>Dashboard</a>
+        <a class="sw-sidebar-link" onclick="showSection('orders',this)"><i class="bi bi-receipt"></i>Orders</a>
+        <a class="sw-sidebar-link" onclick="showSection('customers',this)"><i class="bi bi-people"></i>Customers</a>
+        <a class="sw-sidebar-link" onclick="showSection('staff',this)"><i class="bi bi-person-badge"></i>Staff</a>
+        <a class="sw-sidebar-link" onclick="showSection('riders',this)"><i class="bi bi-bicycle"></i>Riders</a>
         <hr class="mx-4 my-3" />
-        <a href="/Admin/Services" class="sw-sidebar-link"><i class="bi bi-gear"></i>Manage Services</a>
-        <a href="/Admin/Warehouses" class="sw-sidebar-link"><i class="bi bi-geo-alt"></i>Manage Warehouses</a>
-        <a href="/Admin/CreateAccount" class="sw-sidebar-link"><i class="bi bi-person-plus"></i>Create Account</a>
+        <div class="px-4 mb-2"><span class="small fw-bold text-muted text-uppercase" style="letter-spacing:1px;">Management</span></div>
+        <a class="sw-sidebar-link" onclick="showSection('services',this)"><i class="bi bi-stars"></i>Services</a>
+        <a class="sw-sidebar-link" onclick="showSection('warehouses',this)"><i class="bi bi-building"></i>Warehouses</a>
+        <a class="sw-sidebar-link" onclick="showSection('detergents',this)"><i class="bi bi-droplet"></i>Detergents</a>
+        <a class="sw-sidebar-link" onclick="showSection('createaccount',this)"><i class="bi bi-person-plus"></i>Create Account</a>
+        <hr class="mx-4 my-3" />
+        <a class="sw-sidebar-link" onclick="showSection('announcements',this)"><i class="bi bi-megaphone"></i>Announcements</a>
     </div>
 
     <div class="flex-fill p-4">
-        <ul class="nav nav-pills sw-nav-pills mb-4 d-lg-none" role="tablist">
-            <li class="nav-item"><button class="nav-link active" onclick="showSection('stats')"><i class="bi bi-speedometer2"></i></button></li>
-            <li class="nav-item"><button class="nav-link" onclick="showSection('orders')"><i class="bi bi-receipt"></i></button></li>
-            <li class="nav-item"><button class="nav-link" onclick="showSection('announcements')"><i class="bi bi-megaphone"></i></button></li>
-            <li class="nav-item"><button class="nav-link" onclick="showSection('customers')"><i class="bi bi-people"></i></button></li>
-            <li class="nav-item"><button class="nav-link" onclick="showSection('staff')"><i class="bi bi-person-badge"></i></button></li>
-            <li class="nav-item"><button class="nav-link" onclick="showSection('riders')"><i class="bi bi-bicycle"></i></button></li>
-        </ul>
+        <div class="d-lg-none mb-3">
+            <button class="btn btn-outline-primary w-100" style="border-radius:var(--sw-radius-sm);" type="button" data-bs-toggle="collapse" data-bs-target="#mobileSidebar">
+                <i class="bi bi-list me-2"></i>Navigation
+            </button>
+            <div class="collapse mt-2" id="mobileSidebar">
+                <div class="sw-card p-3">
+                    <div class="d-flex flex-wrap gap-2">
+                        <button class="btn btn-sm btn-primary" style="border-radius:50px;" onclick="showSection('stats',this)"><i class="bi bi-speedometer2 me-1"></i>Dashboard</button>
+                        <button class="btn btn-sm btn-outline-primary" style="border-radius:50px;" onclick="showSection('orders',this)"><i class="bi bi-receipt me-1"></i>Orders</button>
+                        <button class="btn btn-sm btn-outline-primary" style="border-radius:50px;" onclick="showSection('customers',this)"><i class="bi bi-people me-1"></i>Customers</button>
+                        <button class="btn btn-sm btn-outline-primary" style="border-radius:50px;" onclick="showSection('staff',this)"><i class="bi bi-person-badge me-1"></i>Staff</button>
+                        <button class="btn btn-sm btn-outline-primary" style="border-radius:50px;" onclick="showSection('riders',this)"><i class="bi bi-bicycle me-1"></i>Riders</button>
+                        <button class="btn btn-sm btn-outline-primary" style="border-radius:50px;" onclick="showSection('services',this)"><i class="bi bi-stars me-1"></i>Services</button>
+                        <button class="btn btn-sm btn-outline-primary" style="border-radius:50px;" onclick="showSection('warehouses',this)"><i class="bi bi-building me-1"></i>Warehouses</button>
+                        <button class="btn btn-sm btn-outline-primary" style="border-radius:50px;" onclick="showSection('detergents',this)"><i class="bi bi-droplet me-1"></i>Detergents</button>
+                        <button class="btn btn-sm btn-outline-primary" style="border-radius:50px;" onclick="showSection('createaccount',this)"><i class="bi bi-person-plus me-1"></i>Create</button>
+                        <button class="btn btn-sm btn-outline-primary" style="border-radius:50px;" onclick="showSection('announcements',this)"><i class="bi bi-megaphone me-1"></i>Announce</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div id="section-stats" class="admin-section">
             <div class="row g-3 mb-4">
                 <div class="col-6 col-lg">
-                    <div class="sw-stat-card p-3 text-center">
+                    <div class="sw-stat-card animate-stagger delay-1 p-3 text-center">
                         <i class="bi bi-receipt fs-3 text-primary"></i>
                         <h4 class="fw-bold mt-1 mb-0">@orders.Count</h4>
                         <p class="text-muted small mb-0">Total Orders</p>
                     </div>
                 </div>
                 <div class="col-6 col-lg">
-                    <div class="sw-stat-card p-3 text-center" style="border-top:3px solid var(--sw-warning);">
+                    <div class="sw-stat-card animate-stagger delay-2 p-3 text-center" style="border-top:3px solid var(--sw-warning);">
                         <i class="bi bi-clock fs-3 text-warning"></i>
                         <h4 class="fw-bold mt-1 mb-0">@pendingCount</h4>
                         <p class="text-muted small mb-0">Pending</p>
                     </div>
                 </div>
                 <div class="col-6 col-lg">
-                    <div class="sw-stat-card p-3 text-center" style="border-top:3px solid var(--sw-primary);">
+                    <div class="sw-stat-card animate-stagger delay-3 p-3 text-center" style="border-top:3px solid var(--sw-primary);">
                         <i class="bi bi-arrow-repeat fs-3 text-primary"></i>
                         <h4 class="fw-bold mt-1 mb-0">@inProgress</h4>
                         <p class="text-muted small mb-0">In Progress</p>
                     </div>
                 </div>
                 <div class="col-6 col-lg">
-                    <div class="sw-stat-card p-3 text-center" style="border-top:3px solid var(--sw-success);">
+                    <div class="sw-stat-card animate-stagger delay-4 p-3 text-center" style="border-top:3px solid var(--sw-success);">
                         <i class="bi bi-check-circle fs-3" style="color:var(--sw-success);"></i>
                         <h4 class="fw-bold mt-1 mb-0">@delivered</h4>
                         <p class="text-muted small mb-0">Delivered</p>
                     </div>
                 </div>
                 <div class="col-12 col-lg">
-                    <div class="sw-stat-card p-3 text-center" style="border-top:3px solid var(--sw-success);">
+                    <div class="sw-stat-card animate-stagger delay-5 p-3 text-center" style="border-top:3px solid var(--sw-success);">
                         <i class="bi bi-currency-exchange fs-3" style="color:var(--sw-success);"></i>
                         <h4 class="fw-bold mt-1 mb-0">₱@totalRevenue.ToString("N2")</h4>
                         <p class="text-muted small mb-0">Revenue</p>
                     </div>
                 </div>
             </div>
-            <div class="sw-card p-4">
+            <div class="sw-card animate-stagger delay-6 p-4">
                 <h5 class="fw-bold mb-3">Quick Overview</h5>
                 <div class="row g-3">
                     <div class="col-md-3 text-center"><h6 class="text-muted small mb-1">Customers</h6><h4 class="fw-bold text-primary">@customerList.Count</h4></div>
@@ -124,14 +133,14 @@
                             <tbody>
                                 @foreach (var o in orders)
                                 {
-                                    var customer = profileDict.ContainsKey(o.CustomerId) ? profileDict[o.CustomerId] : null;
+                                    var customer = !string.IsNullOrEmpty(o.CustomerId) && profileDict.ContainsKey(o.CustomerId) ? profileDict[o.CustomerId] : null;
                                     var hasReview = reviewDict.ContainsKey(o.Id);
                                     <tr>
                                         <td class="fw-bold">#@o.Id</td>
                                         <td class="small">@(customer != null ? customer.FullName : "—")</td>
-                                        <td class="small">@(serviceDict.ContainsKey(o.ServiceId) ? serviceDict[o.ServiceId] : "—")</td>
-                                        <td>@o.WeightKg kg</td>
-                                        <td class="fw-bold text-primary">₱@o.TotalPrice.ToString("F2")</td>
+                                        <td class="small">@(!string.IsNullOrEmpty(o.ServiceId) && serviceDict.ContainsKey(o.ServiceId) ? serviceDict[o.ServiceId] : "—")</td>
+                                        <td>@(o.WeightKg.HasValue ? o.WeightKg.Value.ToString("F1") + " kg" : "—")</td>
+                                        <td class="fw-bold text-primary">@(o.TotalPrice.HasValue ? "₱" + o.TotalPrice.Value.ToString("F2") : "—")</td>
                                         <td><span class="sw-status-badge sw-status-@o.Status.Replace(" ", "-").ToLower()">@o.Status</span></td>
                                         <td>
                                             @if (hasReview)
@@ -175,6 +184,309 @@
                             </tbody>
                         </table>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="section-customers" class="admin-section d-none">
+            <div class="sw-card">
+                <div class="p-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-people text-primary me-2"></i>Customers (@customerList.Count)</h5>
+                    <div class="table-responsive">
+                        <table class="sw-table">
+                            <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Joined</th></tr></thead>
+                            <tbody>
+                                @foreach (var c in customerList)
+                                {
+                                    <tr>
+                                        <td class="fw-semibold">@c.FullName</td>
+                                        <td class="small">@c.Email</td>
+                                        <td class="small">+63 @c.Phone</td>
+                                        <td class="small">@c.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="section-staff" class="admin-section d-none">
+            <div class="sw-card">
+                <div class="p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0"><i class="bi bi-person-badge text-primary me-2"></i>Staff (@staffList.Count)</h5>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="sw-table">
+                            <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Joined</th></tr></thead>
+                            <tbody>
+                                @foreach (var s in staffList)
+                                {
+                                    <tr>
+                                        <td class="fw-semibold">@s.FullName</td>
+                                        <td class="small">@s.Email</td>
+                                        <td class="small">+63 @s.Phone</td>
+                                        <td class="small">@s.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="section-riders" class="admin-section d-none">
+            <div class="sw-card">
+                <div class="p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0"><i class="bi bi-bicycle text-primary me-2"></i>Riders (@riderList.Count)</h5>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="sw-table">
+                            <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Joined</th></tr></thead>
+                            <tbody>
+                                @foreach (var r in riderList)
+                                {
+                                    <tr>
+                                        <td class="fw-semibold">@r.FullName</td>
+                                        <td class="small">@r.Email</td>
+                                        <td class="small">+63 @r.Phone</td>
+                                        <td class="small">@r.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="section-services" class="admin-section d-none">
+            <div class="sw-card mb-4">
+                <div class="p-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-plus-circle text-primary me-2"></i>Add New Service</h5>
+                    <form method="post" action="/Admin/CreateService" class="needs-validation" novalidate>
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-2"><label class="form-label small fw-semibold">Name</label><input type="text" name="name" class="form-control sw-input" placeholder="Regular Wash" required /></div>
+                            <div class="col-md-3"><label class="form-label small fw-semibold">Description</label><input type="text" name="description" class="form-control sw-input" placeholder="Everyday clothes wash" required /></div>
+                            <div class="col-md-2"><label class="form-label small fw-semibold">Price/kg (₱)</label><input type="number" name="pricePerKg" class="form-control sw-input" step="0.01" placeholder="55" required /></div>
+                            <div class="col-md-1"><label class="form-label small fw-semibold">Icon</label><input type="text" name="icon" class="form-control sw-input" placeholder="🧺" required /></div>
+                            <div class="col-md-1"><label class="form-label small fw-semibold">Max Kg</label><input type="number" name="maxKg" class="form-control sw-input" placeholder="8" required /></div>
+                            <div class="col-md-1">
+                                <div class="form-check form-switch mt-2">
+                                    <input class="form-check-input" type="checkbox" name="isActive" value="true" checked />
+                                    <label class="form-check-label small">Active</label>
+                                </div>
+                            </div>
+                            <div class="col-md-2"><button type="submit" class="sw-btn sw-btn-primary w-100" style="min-height:44px;"><i class="bi bi-plus me-1"></i>Add</button></div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="row g-3">
+                @foreach (var s in services)
+                {
+                    <div class="col-md-6 col-lg-4">
+                        <div class="sw-card h-100 @(s.IsActive ? "" : "opacity-50")" style="border-top:3px solid @(s.IsActive ? "var(--sw-primary)" : "var(--sw-gray-300)");">
+                            <div class="p-4">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div class="sw-service-icon-wrap" style="width:48px;height:48px;margin:0;font-size:1.3rem;">@s.Icon</div>
+                                    <span class="sw-status-badge @(s.IsActive ? "sw-status-delivered" : "sw-status-cancelled")">@(s.IsActive ? "Active" : "Inactive")</span>
+                                </div>
+                                <h6 class="fw-bold mt-2">@s.Name</h6>
+                                <p class="text-muted small mb-2">@s.Description</p>
+                                <div class="d-flex gap-2 mb-3">
+                                    <span class="sw-price-tag">₱@s.PricePerKg/kg</span>
+                                    <span class="sw-max-tag">Up to @s.MaxKg kg</span>
+                                </div>
+                                <button class="sw-btn sw-btn-primary w-100" style="min-height:36px;padding:6px 12px;font-size:0.85rem;" data-bs-toggle="modal" data-bs-target="#editSvc-@s.Id">
+                                    <i class="bi bi-pencil me-1"></i>Edit
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div id="section-warehouses" class="admin-section d-none">
+            <div class="sw-card mb-4">
+                <div class="p-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-plus-circle text-primary me-2"></i>Add Warehouse</h5>
+                    <div id="addWarehouseMap" style="height:300px;border-radius:var(--sw-radius);" class="mb-3"></div>
+                    <form method="post" action="/Admin/CreateWarehouse" id="addWarehouseForm" class="needs-validation" novalidate>
+                        <div class="row g-3">
+                            <div class="col-md-3"><label class="form-label small fw-semibold">Name</label><input type="text" name="name" class="form-control sw-input" placeholder="Main Hub — Makati" required /></div>
+                            <div class="col-md-5"><label class="form-label small fw-semibold">Address</label><input type="text" name="address" id="addAddress" class="form-control sw-input" placeholder="📍 Drop pin on map or type address" required /></div>
+                            <div class="col-md-1"><input type="hidden" name="lat" id="addLat" /><input type="hidden" name="lng" id="addLng" /></div>
+                            <div class="col-md-1">
+                                <label class="form-label small fw-semibold">Active</label>
+                                <div class="form-check form-switch mt-1">
+                                    <input class="form-check-input" type="checkbox" name="isActive" value="true" checked />
+                                </div>
+                            </div>
+                            <div class="col-md-2"><label class="form-label small fw-semibold">&nbsp;</label><button type="submit" class="sw-btn sw-btn-primary w-100" style="min-height:44px;"><i class="bi bi-plus me-1"></i>Add</button></div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <h5 class="fw-bold mb-3"><i class="bi bi-list-ul text-primary me-2"></i>All Warehouses (@warehouses.Count)</h5>
+            @if (warehouses.Any())
+            {
+                <div class="table-responsive">
+                    <div class="sw-card">
+                        <div class="p-4">
+                            <table class="sw-table">
+                                <thead><tr><th>Name</th><th>Address</th><th>Coordinates</th><th>Status</th><th></th></tr></thead>
+                                <tbody>
+                                    @foreach (var w in warehouses)
+                                    {
+                                        <tr>
+                                            <td class="fw-semibold">@w.Name</td>
+                                            <td class="small">@w.Address</td>
+                                            <td class="small">@w.Lat.ToString("F4"), @w.Lng.ToString("F4")</td>
+                                            <td><span class="sw-status-badge @(w.IsActive ? "sw-status-delivered" : "sw-status-cancelled")">@(w.IsActive ? "Active" : "Inactive")</span></td>
+                                            <td>
+                                                <div class="d-flex gap-1">
+                                                    <button class="btn btn-sm btn-outline-primary" style="border-radius:var(--sw-radius-xs);" data-bs-toggle="modal" data-bs-target="#editWh-@w.Id"><i class="bi bi-pencil"></i></button>
+                                                    <button class="btn btn-sm btn-outline-danger" style="border-radius:var(--sw-radius-xs);" data-bs-toggle="modal" data-bs-target="#deleteWh-@w.Id"><i class="bi bi-trash"></i></button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="sw-card"><div class="sw-empty-state"><i class="bi bi-building"></i><p>No warehouses yet</p></div></div>
+            }
+        </div>
+
+        <div id="section-createaccount" class="admin-section d-none">
+            <div class="row justify-content-center">
+                <div class="col-md-8 col-lg-6">
+                    <div class="sw-card">
+                        <div class="p-5">
+                            <div class="text-center mb-4">
+                                <div class="sw-auth-logo mx-auto">👤</div>
+                                <h4 class="fw-bold mt-3">New Account</h4>
+                                <p class="text-muted small">Create a staff or rider account for your team</p>
+                            </div>
+                            <form method="post" action="/Admin/CreateAccount" class="needs-validation" novalidate>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold">Full Name</label>
+                                    <div class="input-group has-validation">
+                                        <span class="sw-input-icon"><i class="bi bi-person"></i></span>
+                                        <input type="text" name="fullName" class="form-control sw-input" placeholder="Juan Dela Cruz" pattern="[A-Za-z\s]+" required />
+                                        <div class="invalid-feedback">Letters and spaces only</div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold">Email Address</label>
+                                    <div class="input-group has-validation">
+                                        <span class="sw-input-icon"><i class="bi bi-envelope"></i></span>
+                                        <input type="email" name="email" class="form-control sw-input" placeholder="juan@smartwash.ph" required />
+                                        <div class="invalid-feedback">Please enter a valid email</div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold">Password</label>
+                                    <div class="input-group has-validation">
+                                        <span class="sw-input-icon"><i class="bi bi-lock"></i></span>
+                                        <input type="password" name="password" id="adminPassword" class="form-control sw-input" placeholder="Enter password" required />
+                                        <button type="button" class="btn btn-outline-secondary border-start-0" style="border-color:var(--sw-gray-200);border-radius:0 var(--sw-radius-sm) var(--sw-radius-sm) 0;" onclick="togglePassword('adminPassword', this)">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                        <div class="invalid-feedback">Password is required</div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold">Phone Number</label>
+                                    <div class="input-group has-validation">
+                                        <span class="sw-input-icon fw-semibold">+63</span>
+                                        <input type="tel" name="phone" id="adminPhoneInput" class="form-control sw-input" placeholder="917 123 4567" maxlength="12" inputmode="numeric" pattern="[0-9 ]{10,12}" required />
+                                        <div class="invalid-feedback">Exactly 10 digits required</div>
+                                    </div>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label small fw-semibold">Role</label>
+                                    <select name="roleName" class="form-select sw-input" required>
+                                        <option value="staff">Staff</option>
+                                        <option value="rider">Rider</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="sw-btn sw-btn-primary w-100">
+                                    <i class="bi bi-person-plus"></i> Create Account
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="section-detergents" class="admin-section d-none">
+            <div class="sw-card mb-4">
+                <div class="p-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-plus-circle text-primary me-2"></i>Add New Detergent</h5>
+                    <form method="post" action="/Admin/CreateDetergent">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-3"><label class="form-label small fw-semibold">Name</label><input type="text" name="name" class="form-control sw-input" placeholder="Ariel Powder" required /></div>
+                            <div class="col-md-3"><label class="form-label small fw-semibold">Brand</label><input type="text" name="brand" class="form-control sw-input" placeholder="Ariel" /></div>
+                            <div class="col-md-2">
+                                <div class="form-check form-switch mt-2">
+                                    <input class="form-check-input" type="checkbox" name="isActive" value="true" checked />
+                                    <label class="form-check-label small">Active</label>
+                                </div>
+                            </div>
+                            <div class="col-md-2"><button type="submit" class="sw-btn sw-btn-primary w-100" style="min-height:44px;"><i class="bi bi-plus me-1"></i>Add</button></div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="sw-card">
+                <div class="p-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-droplet text-primary me-2"></i>All Detergents (@detergents.Count)</h5>
+                    @if (detergents.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="sw-table">
+                                <thead><tr><th>Name</th><th>Brand</th><th>Status</th><th></th></tr></thead>
+                                <tbody>
+                                    @foreach (var d in detergents)
+                                    {
+                                        <tr class="@(d.IsActive == true ? "" : "opacity-50")">
+                                            <td class="fw-semibold">@d.Name</td>
+                                            <td class="small">@(d.Brand ?? "—")</td>
+                                            <td><span class="sw-status-badge @(d.IsActive == true ? "sw-status-delivered" : "sw-status-cancelled")">@(d.IsActive == true ? "Active" : "Inactive")</span></td>
+                                            <td>
+                                                <div class="d-flex gap-1">
+                                                    <form method="post" action="/Admin/ToggleDetergent">
+                                                        <input type="hidden" name="id" value="@d.Id" />
+                                                        <button type="submit" class="btn btn-sm @(d.IsActive == true ? "btn-outline-warning" : "btn-outline-success")" style="border-radius:var(--sw-radius-xs);">
+                                                            <i class="bi @(d.IsActive == true ? "bi-pause" : "bi-play")"></i>
+                                                        </button>
+                                                    </form>
+                                                    <button class="btn btn-sm btn-outline-danger" style="border-radius:var(--sw-radius-xs);" data-bs-toggle="modal" data-bs-target="#deleteDet-@d.Id"><i class="bi bi-trash"></i></button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="sw-empty-state"><i class="bi bi-droplet"></i><p>No detergents yet</p></div>
+                    }
                 </div>
             </div>
         </div>
@@ -232,111 +544,6 @@
                 </div>
             </div>
         </div>
-
-        <div id="section-customers" class="admin-section d-none">
-            <div class="sw-card">
-                <div class="p-4">
-                    <h5 class="fw-bold mb-3"><i class="bi bi-people text-primary me-2"></i>Customers (@customerList.Count)</h5>
-                    <div class="table-responsive">
-                        <table class="sw-table">
-                            <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Joined</th></tr></thead>
-                            <tbody>
-                                @foreach (var c in customerList)
-                                {
-                                    <tr>
-                                        <td class="fw-semibold">@c.FullName</td>
-                                        <td class="small">@c.Email</td>
-                                        <td class="small">+63 @c.Phone</td>
-                                        <td class="small">@c.CreatedAt.ToString("MMM dd, yyyy")</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="section-staff" class="admin-section d-none">
-            <div class="sw-card">
-                <div class="p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="fw-bold mb-0"><i class="bi bi-person-badge text-primary me-2"></i>Staff (@staffList.Count)</h5>
-                        <a href="/Admin/CreateAccount" class="sw-btn sw-btn-primary" style="min-height:36px;padding:6px 16px;font-size:0.85rem;"><i class="bi bi-plus"></i> Add Staff</a>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="sw-table">
-                            <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Joined</th></tr></thead>
-                            <tbody>
-                                @foreach (var s in staffList)
-                                {
-                                    <tr>
-                                        <td class="fw-semibold">@s.FullName</td>
-                                        <td class="small">@s.Email</td>
-                                        <td class="small">+63 @s.Phone</td>
-                                        <td class="small">@s.CreatedAt.ToString("MMM dd, yyyy")</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="section-riders" class="admin-section d-none">
-            <div class="sw-card">
-                <div class="p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="fw-bold mb-0"><i class="bi bi-bicycle text-primary me-2"></i>Riders (@riderList.Count)</h5>
-                        <a href="/Admin/CreateAccount" class="sw-btn sw-btn-primary" style="min-height:36px;padding:6px 16px;font-size:0.85rem;"><i class="bi bi-plus"></i> Add Rider</a>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="sw-table">
-                            <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Joined</th></tr></thead>
-                            <tbody>
-                                @foreach (var r in riderList)
-                                {
-                                    <tr>
-                                        <td class="fw-semibold">@r.FullName</td>
-                                        <td class="small">@r.Email</td>
-                                        <td class="small">+63 @r.Phone</td>
-                                        <td class="small">@r.CreatedAt.ToString("MMM dd, yyyy")</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="section-warehouses" class="admin-section d-none">
-            <div class="sw-card">
-                <div class="p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="fw-bold mb-0"><i class="bi bi-building text-primary me-2"></i>Warehouses (@warehouses.Count)</h5>
-                        <a href="/Admin/Warehouses" class="sw-btn sw-btn-primary" style="min-height:36px;padding:6px 16px;font-size:0.85rem;"><i class="bi bi-gear"></i> Manage</a>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="sw-table">
-                            <thead><tr><th>Name</th><th>Address</th><th>Coordinates</th><th>Status</th></tr></thead>
-                            <tbody>
-                                @foreach (var w in warehouses)
-                                {
-                                    <tr>
-                                        <td class="fw-semibold">@w.Name</td>
-                                        <td class="small">@w.Address</td>
-                                        <td class="small">@w.Lat.ToString("F4"), @w.Lng.ToString("F4")</td>
-                                        <td><span class="sw-status-badge @(w.IsActive ? "sw-status-delivered" : "sw-status-cancelled")">@(w.IsActive ? "Active" : "Inactive")</span></td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 
@@ -374,13 +581,187 @@
     </div>
 }
 
+@foreach (var s in services)
+{
+    <div class="modal fade" id="editSvc-@s.Id" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius:var(--sw-radius-lg);">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-pencil text-primary me-2"></i>Edit Service</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="post" action="/Admin/UpdateService" class="needs-validation" novalidate>
+                    <div class="modal-body">
+                        <input type="hidden" name="id" value="@s.Id" />
+                        <div class="mb-3"><label class="form-label small fw-semibold">Name</label><input type="text" name="name" class="form-control sw-input" value="@s.Name" required /></div>
+                        <div class="mb-3"><label class="form-label small fw-semibold">Description</label><input type="text" name="description" class="form-control sw-input" value="@s.Description" required /></div>
+                        <div class="row g-3">
+                            <div class="col-4"><label class="form-label small fw-semibold">Price/kg</label><input type="number" name="pricePerKg" class="form-control sw-input" step="0.01" value="@s.PricePerKg" required /></div>
+                            <div class="col-4"><label class="form-label small fw-semibold">Icon</label><input type="text" name="icon" class="form-control sw-input" value="@s.Icon" required /></div>
+                            <div class="col-4"><label class="form-label small fw-semibold">Max Kg</label><input type="number" name="maxKg" class="form-control sw-input" value="@s.MaxKg" required /></div>
+                        </div>
+                        <div class="form-check form-switch mt-3">
+                            <input class="form-check-input" type="checkbox" name="isActive" value="true" @(s.IsActive ? "checked" : "") />
+                            <label class="form-check-label">Active</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="submit" class="sw-btn sw-btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+@foreach (var w in warehouses)
+{
+    <div class="modal fade" id="editWh-@w.Id" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius:var(--sw-radius-lg);">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-pencil text-primary me-2"></i>Edit Warehouse</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="post" action="/Admin/UpdateWarehouse" class="needs-validation" novalidate>
+                    <div class="modal-body">
+                        <input type="hidden" name="id" value="@w.Id" />
+                        <div class="mb-3"><label class="form-label small fw-semibold">Name</label><input type="text" name="name" class="form-control sw-input" value="@w.Name" required /></div>
+                        <div class="mb-3"><label class="form-label small fw-semibold">Address</label><input type="text" name="address" class="form-control sw-input" value="@w.Address" required /></div>
+                        <div class="row g-3">
+                            <div class="col-6"><label class="form-label small fw-semibold">Latitude</label><input type="text" name="lat" class="form-control sw-input" value="@w.Lat" required /></div>
+                            <div class="col-6"><label class="form-label small fw-semibold">Longitude</label><input type="text" name="lng" class="form-control sw-input" value="@w.Lng" required /></div>
+                        </div>
+                        <div class="form-check form-switch mt-3">
+                            <input class="form-check-input" type="checkbox" name="isActive" value="true" @(w.IsActive ? "checked" : "") />
+                            <label class="form-check-label">Active</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="submit" class="sw-btn sw-btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+@foreach (var w in warehouses)
+{
+    <div class="modal fade" id="deleteWh-@w.Id" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius:var(--sw-radius-lg);">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-exclamation-triangle text-danger me-2"></i>Delete Warehouse</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete <strong>@w.Name</strong>? This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-secondary" style="border-radius:var(--sw-radius-sm);" data-bs-dismiss="modal">Cancel</button>
+                    <form method="post" action="/Admin/DeleteWarehouse">
+                        <input type="hidden" name="id" value="@w.Id" />
+                        <button type="submit" class="btn btn-danger" style="border-radius:var(--sw-radius-sm);"><i class="bi bi-trash me-1"></i>Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@foreach (var d in detergents)
+{
+    <div class="modal fade" id="deleteDet-@d.Id" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius:var(--sw-radius-lg);">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-exclamation-triangle text-danger me-2"></i>Delete Detergent</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete <strong>@d.Name</strong>? This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-secondary" style="border-radius:var(--sw-radius-sm);" data-bs-dismiss="modal">Cancel</button>
+                    <form method="post" action="/Admin/DeleteDetergent">
+                        <input type="hidden" name="id" value="@d.Id" />
+                        <button type="submit" class="btn btn-danger" style="border-radius:var(--sw-radius-sm);"><i class="bi bi-trash me-1"></i>Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @section Scripts {
 <script>
-    function showSection(name) {
+    function showSection(name, el) {
         document.querySelectorAll('.admin-section').forEach(s => s.classList.add('d-none'));
         document.getElementById('section-' + name).classList.remove('d-none');
         document.querySelectorAll('.sw-sidebar-link').forEach(l => l.classList.remove('active'));
-        event.target.closest('.sw-sidebar-link')?.classList.add('active');
+        if (el && el.classList.contains('sw-sidebar-link')) el.classList.add('active');
+        if (name === 'warehouses') {
+            setTimeout(function () {
+                if (!window.whMapInit) {
+                    window.whMapInit = true;
+                    var map = L.map('addWarehouseMap').setView([14.5995, 120.9842], 12);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+                    var marker = L.marker([14.5995, 120.9842], { draggable: true }).addTo(map);
+                    marker.on('dragend', function () { reverseGeocode(marker); });
+                    map.on('click', function (e) { marker.setLatLng(e.latlng); reverseGeocode(marker); });
+                    reverseGeocode(marker);
+                    function reverseGeocode(m) {
+                        var lat = m.getLatLng().lat;
+                        var lng = m.getLatLng().lng;
+                        document.getElementById('addLat').value = lat;
+                        document.getElementById('addLng').value = lng;
+                        fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lng)
+                            .then(r => r.json())
+                            .then(data => { document.getElementById('addAddress').value = data.display_name || ''; });
+                    }
+                }
+            }, 200);
+        }
     }
+
+    function togglePassword(inputId, btn) {
+        var input = document.getElementById(inputId);
+        var icon = btn.querySelector('i');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.className = 'bi bi-eye-slash';
+        } else {
+            input.type = 'password';
+            icon.className = 'bi bi-eye';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var phoneInput = document.getElementById('adminPhoneInput');
+        if (phoneInput) {
+            phoneInput.addEventListener('input', function (e) {
+                var v = e.target.value.replace(/\D/g, '').substring(0, 10);
+                var f = '';
+                if (v.length > 0) f = v.substring(0, 3);
+                if (v.length > 3) f += ' ' + v.substring(3, 6);
+                if (v.length > 6) f += ' ' + v.substring(6, 10);
+                e.target.value = f;
+            });
+        }
+    });
+
+    (function () {
+        var forms = document.querySelectorAll('.needs-validation');
+        forms.forEach(function (form) {
+            form.addEventListener('submit', function (e) {
+                if (!form.checkValidity()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            });
+        });
+    })();
 </script>
 }

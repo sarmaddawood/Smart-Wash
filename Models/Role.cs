@@ -7,10 +7,10 @@ namespace SmartWash.Models
     public class Role : BaseModel
     {
         [PrimaryKey("id")]
-        public long Id { get; set; }
+        public string Id { get; set; } = string.Empty;
 
         [Column("name")]
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         [Column("created_at")]
         public DateTime CreatedAt { get; set; }

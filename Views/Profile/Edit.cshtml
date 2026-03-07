@@ -1,0 +1,112 @@
+@{
+    ViewData["Title"] = "Edit Profile";
+    var fullName = ViewBag.FullName as string ?? "";
+    var email = ViewBag.Email as string ?? "";
+    var phone = ViewBag.Phone as string ?? "";
+    var password = ViewBag.Password as string ?? "";
+    var userRole = ViewBag.UserRole as string ?? "";
+}
+
+<div class="sw-page-header">
+    <div class="container">
+        <h2 class="fw-bold text-white mb-1"><i class="bi bi-pencil-square me-2"></i>Edit Profile</h2>
+        <p class="text-white-50 mb-0">Update your account information</p>
+    </div>
+</div>
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="sw-card">
+                <div class="p-5">
+                    <div class="text-center mb-4">
+                        <div class="d-flex align-items-center justify-content-center mx-auto" style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--sw-primary),#60a5fa);">
+                            <i class="bi bi-person-fill text-white fs-2"></i>
+                        </div>
+                        <h5 class="fw-bold mt-3 mb-1">@fullName</h5>
+                        <span class="badge bg-primary" style="border-radius:50px;">@userRole</span>
+                    </div>
+
+                    <form method="post" action="/Profile/Edit" id="editProfileForm" class="needs-validation" novalidate>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Full Name</label>
+                            <div class="input-group">
+                                <span class="sw-input-icon"><i class="bi bi-person"></i></span>
+                                <input type="text" name="fullName" class="form-control sw-input" value="@fullName" pattern="[A-Za-z\s]+" required />
+                                <div class="invalid-feedback">Please enter a valid name (letters and spaces only)</div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Email Address</label>
+                            <div class="input-group">
+                                <span class="sw-input-icon"><i class="bi bi-envelope"></i></span>
+                                <input type="email" name="email" class="form-control sw-input" value="@email" required />
+                                <div class="invalid-feedback">Please enter a valid email address</div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Phone Number</label>
+                            <div class="input-group">
+                                <span class="sw-input-icon fw-semibold">+63</span>
+                                <input type="tel" name="phone" id="phoneInput" class="form-control sw-input" value="@phone" maxlength="12" inputmode="numeric" pattern="[0-9 ]{10,12}" required />
+                                <div class="invalid-feedback">Please enter exactly 10 digits</div>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label small fw-semibold">Password</label>
+                            <div class="input-group">
+                                <span class="sw-input-icon"><i class="bi bi-lock"></i></span>
+                                <input type="password" name="password" id="profilePassword" class="form-control sw-input" value="@password" required />
+                                <button type="button" class="btn btn-outline-secondary border-start-0" style="border-color:var(--sw-gray-200);border-radius:0 var(--sw-radius-sm) var(--sw-radius-sm) 0;" onclick="togglePassword('profilePassword', this)">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <div class="invalid-feedback">Please enter a password</div>
+                            </div>
+                        </div>
+                        <button type="submit" class="sw-btn sw-btn-primary w-100 mb-3">
+                            <i class="bi bi-check-circle"></i> Save Changes
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function togglePassword(inputId, btn) {
+        var input = document.getElementById(inputId);
+        var icon = btn.querySelector('i');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.className = 'bi bi-eye-slash';
+        } else {
+            input.type = 'password';
+            icon.className = 'bi bi-eye';
+        }
+    }
+
+    document.getElementById('phoneInput').addEventListener('input', function (e) {
+        var v = e.target.value.replace(/\D/g, '').substring(0, 10);
+        var f = '';
+        if (v.length > 0) f = v.substring(0, 3);
+        if (v.length > 3) f += ' ' + v.substring(3, 6);
+        if (v.length > 6) f += ' ' + v.substring(6, 10);
+        e.target.value = f;
+    });
+
+    (function () {
+        var forms = document.querySelectorAll('.needs-validation');
+        forms.forEach(function (form) {
+            form.addEventListener('submit', function (e) {
+                if (!form.checkValidity()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            });
+        });
+    })();
+</script>
+}

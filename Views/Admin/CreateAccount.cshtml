@@ -38,12 +38,13 @@
                         </div>
                     }
 
-                    <form method="post" action="/Admin/CreateAccount">
+                    <form method="post" action="/Admin/CreateAccount" class="needs-validation" novalidate>
                         <div class="mb-3">
                             <label class="form-label small fw-semibold">Full Name</label>
                             <div class="input-group">
                                 <span class="sw-input-icon"><i class="bi bi-person"></i></span>
-                                <input type="text" name="fullName" class="form-control sw-input" placeholder="Juan Dela Cruz" required />
+                                <input type="text" name="fullName" class="form-control sw-input" placeholder="Juan Dela Cruz" pattern="[A-Za-z\s]+" required />
+                                <div class="invalid-feedback">Letters and spaces only</div>
                             </div>
                         </div>
                         <div class="mb-3">
@@ -51,20 +52,26 @@
                             <div class="input-group">
                                 <span class="sw-input-icon"><i class="bi bi-envelope"></i></span>
                                 <input type="email" name="email" class="form-control sw-input" placeholder="juan@smartwash.ph" required />
+                                <div class="invalid-feedback">Please enter a valid email</div>
                             </div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label small fw-semibold">Password</label>
-                            <div class="input-group">
+                            <div class="input-group has-validation">
                                 <span class="sw-input-icon"><i class="bi bi-lock"></i></span>
-                                <input type="password" name="password" class="form-control sw-input" placeholder="Minimum 6 characters" required />
+                                <input type="password" name="password" id="adminPassword" class="form-control sw-input" placeholder="Enter password" required />
+                                <button type="button" class="btn btn-outline-secondary border-start-0" style="border-color:var(--sw-gray-200);border-radius:0 var(--sw-radius-sm) var(--sw-radius-sm) 0;" onclick="togglePassword('adminPassword', this)">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <div class="invalid-feedback">Password is required</div>
                             </div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label small fw-semibold">Phone Number</label>
                             <div class="input-group">
                                 <span class="sw-input-icon fw-semibold">+63</span>
-                                <input type="text" name="phone" class="form-control sw-input" placeholder="917 123 4567" required />
+                                <input type="tel" name="phone" id="adminPhoneInput" class="form-control sw-input" placeholder="917 123 4567" maxlength="12" inputmode="numeric" pattern="[0-9 ]{10,12}" required />
+                                <div class="invalid-feedback">Exactly 10 digits required</div>
                             </div>
                         </div>
                         <div class="mb-4">
@@ -83,3 +90,41 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+<script>
+    function togglePassword(inputId, btn) {
+        var input = document.getElementById(inputId);
+        var icon = btn.querySelector('i');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.className = 'bi bi-eye-slash';
+        } else {
+            input.type = 'password';
+            icon.className = 'bi bi-eye';
+        }
+    }
+
+    document.getElementById('adminPhoneInput').addEventListener('input', function (e) {
+        var v = e.target.value.replace(/\D/g, '').substring(0, 10);
+        var f = '';
+        if (v.length > 0) f = v.substring(0, 3);
+        if (v.length > 3) f += ' ' + v.substring(3, 6);
+        if (v.length > 6) f += ' ' + v.substring(6, 10);
+        e.target.value = f;
+    });
+
+    (function () {
+        var forms = document.querySelectorAll('.needs-validation');
+        forms.forEach(function (form) {
+            form.addEventListener('submit', function (e) {
+                if (!form.checkValidity()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            });
+        });
+    })();
+</script>
+}

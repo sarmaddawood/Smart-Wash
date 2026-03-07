@@ -1,9 +1,9 @@
 @{
-    ViewData["Title"] = "Login";
+    ViewData["Title"] = "Sign In";
 }
 
 <div class="sw-auth-bg">
-    <div class="sw-auth-card">
+    <div class="sw-auth-card animate-stagger delay-1">
         <div class="p-5">
             <div class="text-center mb-4">
                 <div class="sw-auth-logo">🫧</div>
@@ -18,19 +18,24 @@
                 </div>
             }
 
-            <form method="post" action="/Auth/Login">
+            <form method="post" action="/Auth/Login" class="needs-validation" novalidate>
                 <div class="mb-3">
                     <label class="form-label small fw-semibold">Email Address</label>
-                    <div class="input-group">
+                    <div class="input-group has-validation">
                         <span class="sw-input-icon"><i class="bi bi-envelope"></i></span>
                         <input type="email" name="email" class="form-control sw-input" placeholder="juan@email.com" required />
+                        <div class="invalid-feedback">Please enter a valid email</div>
                     </div>
                 </div>
                 <div class="mb-4">
                     <label class="form-label small fw-semibold">Password</label>
-                    <div class="input-group">
+                    <div class="input-group has-validation">
                         <span class="sw-input-icon"><i class="bi bi-lock"></i></span>
-                        <input type="password" name="password" class="form-control sw-input" placeholder="Enter your password" required />
+                        <input type="password" name="password" id="loginPassword" class="form-control sw-input" placeholder="Enter your password" required />
+                        <button type="button" class="btn btn-outline-secondary border-start-0" style="border-color:var(--sw-gray-200);border-radius:0 var(--sw-radius-sm) var(--sw-radius-sm) 0;" onclick="togglePassword('loginPassword', this)">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                        <div class="invalid-feedback">Password is required</div>
                     </div>
                 </div>
                 <button type="submit" class="sw-btn sw-btn-primary w-100 mb-3">
@@ -49,3 +54,32 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+<script>
+    function togglePassword(inputId, btn) {
+        var input = document.getElementById(inputId);
+        var icon = btn.querySelector('i');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.className = 'bi bi-eye-slash';
+        } else {
+            input.type = 'password';
+            icon.className = 'bi bi-eye';
+        }
+    }
+
+    (function () {
+        var forms = document.querySelectorAll('.needs-validation');
+        forms.forEach(function (form) {
+            form.addEventListener('submit', function (e) {
+                if (!form.checkValidity()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            });
+        });
+    })();
+</script>
+}

@@ -7,13 +7,13 @@ namespace SmartWash.Models
     public class Announcement : BaseModel
     {
         [PrimaryKey("id")]
-        public long Id { get; set; }
+        public string Id { get; set; } = string.Empty;
 
         [Column("title")]
-        public string Title { get; set; }
+        public string Title { get; set; } = string.Empty;
 
         [Column("message")]
-        public string Message { get; set; }
+        public string Message { get; set; } = string.Empty;
 
         [Column("is_active")]
         public bool IsActive { get; set; }

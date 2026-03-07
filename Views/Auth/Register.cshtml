@@ -3,7 +3,7 @@
 }
 
 <div class="sw-auth-bg">
-    <div class="sw-auth-card">
+    <div class="sw-auth-card animate-stagger delay-1">
         <div class="p-5">
             <div class="text-center mb-4">
                 <div class="sw-auth-logo">🫧</div>
@@ -18,33 +18,54 @@
                 </div>
             }
 
-            <form method="post" action="/Auth/Register">
+            <form method="post" action="/Auth/Register" id="registerForm" class="needs-validation" novalidate onsubmit="return validateForm()">
                 <div class="mb-3">
                     <label class="form-label small fw-semibold">Full Name</label>
-                    <div class="input-group">
+                    <div class="input-group has-validation">
                         <span class="sw-input-icon"><i class="bi bi-person"></i></span>
-                        <input type="text" name="fullName" class="form-control sw-input" placeholder="Juan Dela Cruz" required />
+                        <input type="text" name="fullName" class="form-control sw-input" placeholder="Juan Dela Cruz" pattern="[A-Za-z\s]+" required />
+                        <div class="invalid-feedback">Letters and spaces only</div>
                     </div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label small fw-semibold">Email Address</label>
-                    <div class="input-group">
+                    <div class="input-group has-validation">
                         <span class="sw-input-icon"><i class="bi bi-envelope"></i></span>
                         <input type="email" name="email" class="form-control sw-input" placeholder="juan@email.com" required />
+                        <div class="invalid-feedback">Please enter a valid email</div>
                     </div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label small fw-semibold">Phone Number</label>
-                    <div class="input-group">
+                    <div class="input-group has-validation">
                         <span class="sw-input-icon fw-semibold">+63</span>
-                        <input type="text" name="phone" class="form-control sw-input" placeholder="917 123 4567" required />
+                        <input type="tel" name="phone" id="phoneInput" class="form-control sw-input" placeholder="917 123 4567" maxlength="12" inputmode="numeric" pattern="[0-9 ]{10,12}" required />
+                        <div class="invalid-feedback">Exactly 10 digits required</div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">Password</label>
+                    <div class="input-group has-validation">
+                        <span class="sw-input-icon"><i class="bi bi-lock"></i></span>
+                        <input type="password" name="password" id="regPassword" class="form-control sw-input" placeholder="Enter your password" required />
+                        <button type="button" class="btn btn-outline-secondary border-start-0" style="border-color:var(--sw-gray-200);border-radius:0 var(--sw-radius-sm) var(--sw-radius-sm) 0;" onclick="togglePassword('regPassword', this)">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                        <div class="invalid-feedback">Password is required</div>
                     </div>
                 </div>
                 <div class="mb-4">
-                    <label class="form-label small fw-semibold">Password</label>
-                    <div class="input-group">
-                        <span class="sw-input-icon"><i class="bi bi-lock"></i></span>
-                        <input type="password" name="password" class="form-control sw-input" placeholder="Minimum 6 characters" required />
+                    <label class="form-label small fw-semibold">Confirm Password</label>
+                    <div class="input-group has-validation">
+                        <span class="sw-input-icon"><i class="bi bi-lock-fill"></i></span>
+                        <input type="password" id="confirmPassword" class="form-control sw-input" placeholder="Re-enter your password" required />
+                        <button type="button" class="btn btn-outline-secondary border-start-0" style="border-color:var(--sw-gray-200);border-radius:0 var(--sw-radius-sm) var(--sw-radius-sm) 0;" onclick="togglePassword('confirmPassword', this)">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                        <div class="invalid-feedback">Confirm your password</div>
+                    </div>
+                    <div id="passwordMismatch" class="text-danger small mt-1 d-none">
+                        <i class="bi bi-exclamation-circle me-1"></i>Passwords do not match
                     </div>
                 </div>
                 <button type="submit" class="sw-btn sw-btn-primary w-100 mb-3">
@@ -63,3 +84,56 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+<script>
+    function togglePassword(inputId, btn) {
+        var input = document.getElementById(inputId);
+        var icon = btn.querySelector('i');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.className = 'bi bi-eye-slash';
+        } else {
+            input.type = 'password';
+            icon.className = 'bi bi-eye';
+        }
+    }
+
+    function validateForm() {
+        var form = document.getElementById('registerForm');
+        var pw = document.getElementById('regPassword').value;
+        var cpw = document.getElementById('confirmPassword').value;
+        var msg = document.getElementById('passwordMismatch');
+        if (pw !== cpw) {
+            msg.classList.remove('d-none');
+            form.classList.add('was-validated');
+            return false;
+        }
+        msg.classList.add('d-none');
+        if (!form.checkValidity()) {
+            form.classList.add('was-validated');
+            return false;
+        }
+        return true;
+    }
+
+    document.getElementById('confirmPassword').addEventListener('input', function () {
+        var pw = document.getElementById('regPassword').value;
+        var msg = document.getElementById('passwordMismatch');
+        if (this.value && this.value !== pw) {
+            msg.classList.remove('d-none');
+        } else {
+            msg.classList.add('d-none');
+        }
+    });
+
+    document.getElementById('phoneInput').addEventListener('input', function (e) {
+        var v = e.target.value.replace(/\D/g, '').substring(0, 10);
+        var f = '';
+        if (v.length > 0) f = v.substring(0, 3);
+        if (v.length > 3) f += ' ' + v.substring(3, 6);
+        if (v.length > 6) f += ' ' + v.substring(6, 10);
+        e.target.value = f;
+    });
+</script>
+}

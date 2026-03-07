@@ -1,0 +1,159 @@
+@using SmartWash.Models
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Staff Order Detail";
+    var order = ViewBag.Order as Order;
+    var customer = ViewBag.Customer as Profile;
+    var service = ViewBag.Service as Service;
+    var detergent = ViewBag.Detergent as Detergent;
+    var staffId = ViewBag.StaffId as string;
+}
+
+<div class="container-fluid py-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="mb-0">Staff Order Detail</h1>
+        <a href="@Url.Action("Dashboard", "Staff")" class="btn btn-outline-secondary btn-sm">Back to Dashboard</a>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="card animate-stagger delay-1 p-3 h-100">
+                <h3 class="mb-3">Order Info</h3>
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label>Order ID</label>
+                        <div class="fw-bold">@order?.Id</div>
+                    </div>
+                    <div class="col-6">
+                        <label>Status</label>
+                        <div>
+                            <span class="badge bg-primary rounded-pill fs-12">@order?.Status ?? "N/A"</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label>Customer Details</label>
+                    <div class="fw-bold">@customer?.FullName ?? "N/A"</div>
+                    <div class="text-muted fs-12">@customer?.Email ?? "N/A"</div>
+                    <div class="text-muted fs-12">+63 @customer?.Phone ?? "N/A"</div>
+                </div>
+
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label>Service</label>
+                        <div class="fw-bold">@service?.Name ?? "N/A" (₱@service?.PricePerKg/kg)</div>
+                    </div>
+                    <div class="col-6">
+                        <label>Detergent</label>
+                        <div class="fw-bold">@(detergent?.Name ?? "None")</div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label>Pickup Address</label>
+                    <div class="fs-12">@order?.PickupAddress</div>
+                </div>
+
+                <div class="mb-3">
+                    <label>Special Instructions</label>
+                    <div class="fs-12 text-muted italic">@(string.IsNullOrEmpty(order?.SpecialInstructions) ? "None" : order?.SpecialInstructions)</div>
+                </div>
+
+                <div class="row g-2">
+                    <div class="col-6">
+                        <label>Current Weight</label>
+                        <div class="fw-bold">@(order?.WeightKg.HasValue == true ? $"{order.WeightKg} kg" : "Not measured")</div>
+                    </div>
+                    <div class="col-6">
+                        <label>Current Total</label>
+                        <div class="fw-bold text-primary">@(order?.TotalPrice.HasValue == true ? $"₱{order.TotalPrice:F2}" : "—")</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card animate-stagger delay-2 p-3 h-100">
+                <h3 class="mb-3">Actions</h3>
+
+                @if (order?.Status == "At Warehouse" && string.IsNullOrEmpty(order?.StaffId))
+                {
+                    <form asp-action="AcceptOrder" method="post">
+                        <input type="hidden" name="id" value="@order?.Id" />
+                        <button type="submit" class="btn btn-primary w-100 fw-bold py-2 mb-3">Accept Order</button>
+                    </form>
+                }
+                else if (order?.StaffId == staffId)
+                {
+                    if (order?.Status == "At Warehouse")
+                    {
+                        <form asp-action="ConfirmWeight" method="post" id="weighForm">
+                            <input type="hidden" name="id" value="@order?.Id" />
+                            <div class="mb-3">
+                                <label for="weightKg">Enter Weight (kg)</label>
+                                <input type="number" name="weightKg" id="weightKg" class="form-control" step="0.1" min="0.1" max="8" required />
+                                <div class="form-text fs-12">Max: 8.0 kg</div>
+                            </div>
+
+                            <div class="bg-light p-3 rounded mb-3 border">
+                                <label class="d-block mb-1">Invoice Preview</label>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="fs-12 text-muted">@service?.Name ?? "N/A" (₱@service?.PricePerKg/kg)</span>
+                                    <span id="invoiceTotal" class="fw-bold text-primary">₱0.00</span>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-success w-100 fw-bold py-2">Confirm Weight & Generate Invoice</button>
+                        </form>
+                    }
+                    else if (order?.Status == "Weighed & Measured")
+                    {
+                        <form asp-action="UpdateStatus" method="post">
+                            <input type="hidden" name="id" value="@order?.Id" />
+                            <input type="hidden" name="status" value="Washing" />
+                            <button type="submit" class="btn btn-primary w-100 fw-bold py-2 mb-3">Start Washing</button>
+                        </form>
+                    }
+                    else if (order?.Status == "Washing")
+                    {
+                        <form asp-action="UpdateStatus" method="post">
+                            <input type="hidden" name="id" value="@order?.Id" />
+                            <input type="hidden" name="status" value="Ready for Delivery" />
+                            <button type="submit" class="btn btn-primary w-100 fw-bold py-2 mb-3">Mark Ready for Delivery</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <div class="alert alert-success py-2 fs-12 mb-0">
+                        </div>
+                    }
+                }
+                else if (!string.IsNullOrEmpty(order?.StaffId))
+                {
+                    <div class="alert alert-info py-2 fs-12 mb-0">
+                        This order is currently being handled by another staff member.
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var weightInput = document.getElementById('weightKg');
+            var invoiceTotal = document.getElementById('invoiceTotal');
+            var pricePerKg = @(service?.PricePerKg ?? 0);
+
+            if (weightInput) {
+                weightInput.addEventListener('input', function() {
+                    var weight = parseFloat(this.value) || 0;
+                    var total = weight * pricePerKg;
+                    invoiceTotal.textContent = '₱' + total.toFixed(2);
+                });
+            }
+        });
+    </script>
+}

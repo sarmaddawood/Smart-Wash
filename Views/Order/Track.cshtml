@@ -2,153 +2,155 @@
     ViewData["Title"] = "Track Order";
     var order = ViewBag.Order as SmartWash.Models.Order;
     var service = ViewBag.Service as SmartWash.Models.Service;
-    var rider = ViewBag.Rider as SmartWash.Models.Profile;
-    var warehouse = ViewBag.Warehouse as SmartWash.Models.Warehouse;
+    var detergent = ViewBag.Detergent as SmartWash.Models.Detergent;
     var customer = ViewBag.Customer as SmartWash.Models.Profile;
+    var pickupRider = ViewBag.PickupRider as SmartWash.Models.Profile;
+    var deliveryRider = ViewBag.DeliveryRider as SmartWash.Models.Profile;
+    var warehouse = ViewBag.Warehouse as SmartWash.Models.Warehouse;
 
-    var statuses = new[] { "Pending", "Rider Assigned", "Picked Up", "At Warehouse", "Washing", "Ready for Delivery", "Out for Delivery", "Delivered" };
-    var statusIcons = new[] { "bi-clock", "bi-bicycle", "bi-box-seam", "bi-building", "bi-water", "bi-stars", "bi-truck", "bi-check-circle" };
-    var statusEmojis = new[] { "⏳", "🏍️", "📦", "🏭", "🫧", "✨", "🚀", "🎉" };
-    var currentIndex = Array.IndexOf(statuses, order.Status);
-    var isCancelled = order.Status == "Cancelled";
+    var statuses = new[] { "Pending", "Picked Up", "At Warehouse", "Weighed & Measured", "Washing", "Ready for Delivery", "Out for Delivery", "Delivered" };
+    var statusIcons = new[] { "bi-clock", "bi-bicycle", "bi-building", "bi-calculator", "bi-water", "bi-stars", "bi-truck", "bi-check-circle-fill" };
+    var currentIndex = order != null ? Array.IndexOf(statuses, order.Status) : -1;
+    if (currentIndex < 0) currentIndex = -1;
+
+    var weighedStatuses = new[] { "Weighed & Measured", "Washing", "Ready for Delivery", "Out for Delivery", "Delivered" };
+    var isWeighed = order != null && weighedStatuses.Contains(order.Status);
 }
 
 <div class="sw-page-header">
     <div class="container">
-        <div class="d-flex flex-wrap justify-content-between align-items-center">
-            <div>
-                <h2 class="fw-bold text-white mb-1"><i class="bi bi-geo-alt-fill me-2"></i>Order #@order.Id</h2>
-                <p class="text-white-50 mb-0">Real-time order status tracking</p>
-            </div>
-            <div class="d-flex align-items-center gap-3">
-                <span class="sw-status-badge sw-status-@order.Status.Replace(" ", "-").ToLower() fs-6">@order.Status</span>
-                @if (!isCancelled)
-                {
-                    <span class="sw-live-badge">Live • updates every 30s</span>
-                }
-            </div>
-        </div>
+        <h2 class="fw-bold text-white mb-1"><i class="bi bi-geo-alt-fill me-2"></i>Track Order</h2>
+        <p class="text-white-50 mb-0">Order #@order?.Id</p>
     </div>
 </div>
 
 <div class="container py-4">
     <div class="row g-4">
         <div class="col-lg-8">
-            @if (!isCancelled)
-            {
-                <div class="sw-card mb-4">
-                    <div class="p-4">
-                        <h5 class="fw-bold mb-4"><i class="bi bi-diagram-3 text-primary me-2"></i>Order Progress</h5>
-                        <div class="sw-tracker">
-                            @for (int i = 0; i < statuses.Length; i++)
-                            {
-                                var isCompleted = i <= currentIndex;
-                                var isCurrent = i == currentIndex;
-                                <div class="sw-tracker-step @(isCompleted ? "completed" : "") @(isCurrent ? "current" : "")">
-                                    <div class="sw-tracker-dot">
-                                        @if (isCompleted)
-                                        { <i class="bi bi-check-lg"></i> }
-                                        else
-                                        { <span>@(i + 1)</span> }
-                                    </div>
-                                    <div class="sw-tracker-info">
-                                        <span class="fw-semibold">@statusEmojis[i] @statuses[i]</span>
-                                    </div>
+            <div class="sw-card animate-stagger delay-1 mb-4">
+                <div class="p-4">
+                    <h5 class="fw-bold mb-4"><i class="bi bi-signpost-split text-primary me-2"></i>Order Progress</h5>
+                    <div class="sw-tracker-steps">
+                        @for (int i = 0; i < statuses.Length; i++)
+                        {
+                            var isDone = i <= currentIndex;
+                            var isCurrent = i == currentIndex;
+                            <div class="sw-tracker-step @(isDone ? "done" : "") @(isCurrent ? "current" : "")">
+                                <div class="sw-tracker-dot">
+                                    <i class="bi @statusIcons[i]"></i>
                                 </div>
-                            }
-                        </div>
-                    </div>
-                </div>
-            }
-            else
-            {
-                <div class="sw-card mb-4">
-                    <div class="p-5 text-center">
-                        <i class="bi bi-x-circle-fill text-danger" style="font-size:3rem;"></i>
-                        <h4 class="fw-bold mt-3 mb-2">Order Cancelled</h4>
-                        <p class="text-muted">This order has been cancelled.</p>
-                    </div>
-                </div>
-            }
-
-            @if (rider != null)
-            {
-                <div class="sw-card mb-4">
-                    <div class="p-4">
-                        <h5 class="fw-bold mb-3"><i class="bi bi-bicycle text-primary me-2"></i>Your Rider</h5>
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="sw-avatar">
-                                    <i class="bi bi-person-fill fs-4 text-primary"></i>
-                                </div>
-                                <div>
-                                    <h6 class="fw-bold mb-0">@rider.FullName</h6>
-                                    <p class="text-muted mb-0 small"><i class="bi bi-telephone me-1"></i>+63 @rider.Phone</p>
+                                <div class="sw-tracker-label">
+                                    <span class="fw-semibold">@statuses[i]</span>
+                                    @if (isCurrent)
+                                    {
+                                        <span class="sw-live-badge ms-2" style="font-size:0.65rem;padding:2px 8px;">Current</span>
+                                    }
                                 </div>
                             </div>
-                            <a href="tel:+63@rider.Phone" class="sw-btn sw-btn-primary" style="min-height:36px;padding:6px 16px;font-size:0.85rem;">
-                                <i class="bi bi-telephone"></i> Call
-                            </a>
-                        </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            @if (order?.PickupLat.HasValue == true && order?.PickupLng.HasValue == true)
+            {
+                <div class="sw-card animate-stagger delay-2">
+                    <div class="p-3">
+                        <div id="trackMap" style="height:300px;border-radius:var(--sw-radius-sm);"></div>
                     </div>
                 </div>
             }
         </div>
 
         <div class="col-lg-4">
-            <div class="sw-card sw-summary-card sticky-top" style="top:80px;">
+            <div class="sw-card animate-stagger delay-3 mb-3">
                 <div class="p-4">
                     <h6 class="fw-bold mb-3"><i class="bi bi-receipt text-primary me-2"></i>Order Details</h6>
                     <div class="d-flex justify-content-between small mb-2">
-                        <span class="text-muted">Service:</span>
-                        <span class="fw-semibold">@service.Icon @service.Name</span>
+                        <span class="text-muted">Service</span>
+                        <span class="fw-semibold">@service?.Name</span>
                     </div>
                     <div class="d-flex justify-content-between small mb-2">
-                        <span class="text-muted">Weight:</span>
-                        <span class="fw-semibold">@order.WeightKg kg</span>
+                        <span class="text-muted">Detergent</span>
+                        <span class="fw-semibold">@(detergent?.Name ?? "—")</span>
                     </div>
                     <div class="d-flex justify-content-between small mb-2">
-                        <span class="text-muted">Total:</span>
-                        <span class="fw-bold text-primary fs-5">₱@order.TotalPrice.ToString("F2")</span>
+                        <span class="text-muted">Weight</span>
+                        <span class="fw-semibold">@(isWeighed && order?.WeightKg.HasValue == true ? order.WeightKg.Value.ToString("F1") + " kg" : "—")</span>
                     </div>
                     <hr />
-                    <div class="small mb-2">
-                        <i class="bi bi-geo-alt text-danger me-1"></i>
-                        <span class="text-muted">@order.PickupAddress</span>
-                    </div>
-                    <div class="small mb-2">
-                        <i class="bi bi-house text-success me-1"></i>
-                        <span class="text-muted">@order.DeliveryAddress</span>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="fw-bold">Total</span>
+                        <span class="fw-bold text-primary fs-5">@(isWeighed && order?.TotalPrice.HasValue == true ? "₱" + order.TotalPrice.Value.ToString("F2") : "—")</span>
                     </div>
                     <hr />
                     <div class="d-flex justify-content-between small mb-2">
-                        <span class="text-muted">Pickup Date:</span>
-                        <span class="fw-semibold">@order.PickupDate</span>
+                        <span class="text-muted">Pickup Date</span>
+                        <span class="fw-semibold">@(order?.PickupDate.HasValue == true ? order.PickupDate.Value.ToString("MMM dd, yyyy") : "—")</span>
                     </div>
                     <div class="d-flex justify-content-between small mb-2">
-                        <span class="text-muted">Est. Delivery:</span>
-                        <span class="fw-bold" style="color:var(--sw-success);">@order.EstimatedDelivery</span>
+                        <span class="text-muted">Status</span>
+                        <span class="sw-status-badge sw-status-@(order?.Status?.Replace(" ", "-").ToLower() ?? "pending")">@order?.Status</span>
                     </div>
-                    @if (warehouse != null)
-                    {
-                        <hr />
-                        <div class="small">
-                            <i class="bi bi-building text-primary me-1"></i>
-                            <span class="text-muted">Warehouse: @warehouse.Name</span>
-                        </div>
-                    }
-                    <hr />
-                    <a href="/Order/Receipt/@order.Id" class="sw-btn sw-btn-primary w-100" style="min-height:40px;">
-                        <i class="bi bi-receipt"></i> View Receipt
-                    </a>
                 </div>
             </div>
+
+            <div class="sw-card animate-stagger delay-4 mb-3">
+                <div class="p-4">
+                    <h6 class="fw-bold mb-3"><i class="bi bi-geo-alt text-danger me-2"></i>Addresses</h6>
+                    <p class="small mb-2"><i class="bi bi-geo-alt text-danger me-1"></i><strong>Pickup:</strong> @order.PickupAddress</p>
+                    <p class="small mb-0"><i class="bi bi-house text-success me-1"></i><strong>Delivery:</strong> @order.DeliveryAddress</p>
+                </div>
+            </div>
+
+            <div class="sw-card animate-stagger delay-5 mb-3">
+                <div class="p-4">
+                    <h6 class="fw-bold mb-3"><i class="bi bi-people text-primary me-2"></i>People</h6>
+                    @if (customer != null)
+                    {
+                        <p class="small mb-1"><i class="bi bi-person me-1"></i>@customer.FullName</p>
+                        <p class="small mb-2"><i class="bi bi-telephone me-1"></i>+63 @customer.Phone</p>
+                    }
+                    @if (pickupRider != null)
+                    {
+                        <p class="small mb-1"><i class="bi bi-bicycle me-1 text-warning"></i><strong>Pickup Rider:</strong> @pickupRider.FullName</p>
+                    }
+                    @if (deliveryRider != null)
+                    {
+                        <p class="small mb-1"><i class="bi bi-truck me-1 text-success"></i><strong>Delivery Rider:</strong> @deliveryRider.FullName</p>
+                    }
+                    @if (warehouse != null)
+                    {
+                        <p class="small mb-0"><i class="bi bi-building me-1 text-primary"></i><strong>Warehouse:</strong> @warehouse.Name</p>
+                    }
+                </div>
+            </div>
+
+            <a href="/Order/Receipt/@order?.Id" class="sw-btn sw-btn-primary w-100 mb-3">
+                <i class="bi bi-receipt me-1"></i>View Receipt
+            </a>
         </div>
     </div>
 </div>
 
 @section Scripts {
 <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var mapEl = document.getElementById('trackMap');
+        if (mapEl) {
+            var map = L.map('trackMap').setView([@(order?.PickupLat ?? 14.5995), @(order?.PickupLng ?? 120.9842)], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+            var pickupIcon = L.divIcon({ html: '<i class="bi bi-geo-alt-fill text-danger fs-3"></i>', className: 'sw-map-icon', iconSize: [30, 30], iconAnchor: [15, 30] });
+            var deliveryIcon = L.divIcon({ html: '<i class="bi bi-house-fill text-success fs-3"></i>', className: 'sw-map-icon', iconSize: [30, 30], iconAnchor: [15, 30] });
+            L.marker([@(order?.PickupLat ?? 14.5995), @(order?.PickupLng ?? 120.9842)], { icon: pickupIcon }).addTo(map).bindPopup('📍 Pickup');
+            @if (order?.DeliveryLat.HasValue == true && order?.DeliveryLng.HasValue == true)
+            {
+                <text>L.marker([@order?.DeliveryLat, @order?.DeliveryLng], { icon: deliveryIcon }).addTo(map).bindPopup('🏠 Delivery');</text>
+                <text>map.fitBounds([[@(order?.PickupLat), @(order?.PickupLng)], [@(order?.DeliveryLat), @(order?.DeliveryLng)]], { padding: [30, 30] });</text>
+            }
+        }
+    });
+
     setTimeout(function () { location.reload(); }, 30000);
 </script>
 }

@@ -1,8 +1,8 @@
 @{
     ViewData["Title"] = "Order History";
     var orders = ViewBag.Orders as List<SmartWash.Models.Order> ?? new List<SmartWash.Models.Order>();
-    var serviceDict = ViewBag.ServiceDict as Dictionary<long, string> ?? new Dictionary<long, string>();
-    var reviewedOrderIds = ViewBag.ReviewedOrderIds as HashSet<long> ?? new HashSet<long>();
+    var serviceDict = ViewBag.ServiceDict as Dictionary<string, string> ?? new Dictionary<string, string>();
+    var reviewedOrderIds = ViewBag.ReviewedOrderIds as HashSet<string> ?? new HashSet<string>();
     var currentFilter = ViewBag.CurrentFilter as string ?? "All";
     var statuses = new[] { "All", "Pending", "Rider Assigned", "Picked Up", "At Warehouse", "Washing", "Ready for Delivery", "Out for Delivery", "Delivered", "Cancelled" };
 }
@@ -39,24 +39,24 @@
                         {
                             <tr>
                                 <td class="fw-bold">#@o.Id</td>
-                                <td>@(serviceDict.ContainsKey(o.ServiceId) ? serviceDict[o.ServiceId] : "—")</td>
-                                <td>@o.WeightKg kg</td>
-                                <td class="fw-bold text-primary">₱@o.TotalPrice.ToString("F2")</td>
+                                <td>@(!string.IsNullOrEmpty(o.ServiceId) && serviceDict.ContainsKey(o.ServiceId) ? serviceDict[o.ServiceId] : "—")</td>
+                                <td>@(o.WeightKg.HasValue ? o.WeightKg.Value.ToString("F1") + " kg" : "—")</td>
+                                <td class="fw-bold text-primary">@(o.TotalPrice.HasValue ? "₱" + o.TotalPrice.Value.ToString("F2") : "—")</td>
                                 <td><span class="sw-status-badge sw-status-@o.Status.Replace(" ", "-").ToLower()">@o.Status</span></td>
-                                <td class="small">@o.CreatedAt.ToString("MMM dd, yyyy")</td>
-                                <td class="small">@o.EstimatedDelivery</td>
+                                <td class="small">@(o.CreatedAt.HasValue ? o.CreatedAt.Value.ToString("MMM dd, yyyy") : "—")</td>
+                                <td class="small">@(o.EstimatedDelivery.HasValue ? o.EstimatedDelivery.Value.ToString("MMM dd, yyyy") : "—")</td>
                                 <td>
                                     <div class="d-flex gap-1">
                                         <a href="/Order/Track/@o.Id" class="btn btn-sm btn-outline-primary" style="border-radius:var(--sw-radius-sm);"><i class="bi bi-eye me-1"></i>Track</a>
                                         @if (o.Status == "Delivered" && !reviewedOrderIds.Contains(o.Id))
                                         {
-                                            <button class="btn btn-sm btn-outline-warning" style="border-radius:var(--sw-radius-sm);" data-bs-toggle="modal" data-bs-target="#reviewModal" onclick="setReviewOrder(@o.Id)">
+                                            <button class="btn btn-sm btn-outline-warning" style="border-radius:var(--sw-radius-sm);" data-bs-toggle="modal" data-bs-target="#reviewModal" onclick="setReviewOrder('@o.Id')">
                                                 <i class="bi bi-star me-1"></i>Review
                                             </button>
                                         }
                                         @if (o.Status == "Delivered" && reviewedOrderIds.Contains(o.Id))
                                         {
-                                            <button class="btn btn-sm btn-warning text-white" style="border-radius:var(--sw-radius-sm);" onclick="viewReview(@o.Id)">
+                                            <button class="btn btn-sm btn-warning text-white" style="border-radius:var(--sw-radius-sm);" onclick="viewReview('@o.Id')">
                                                 <i class="bi bi-star-fill me-1"></i>View
                                             </button>
                                         }

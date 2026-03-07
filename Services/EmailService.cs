@@ -8,17 +8,22 @@ namespace SmartWash.Services
         private readonly string _gmailUser;
         private readonly string _gmailAppPassword;
         private readonly string _fromName;
+        private readonly bool _enabled;
 
         public EmailService(IConfiguration configuration)
         {
-            _gmailUser = configuration["Email:GmailUser"];
-            _gmailAppPassword = configuration["Email:GmailAppPassword"];
-            _fromName = configuration["Email:FromName"];
+            _gmailUser = configuration["Email:GmailUser"] ?? string.Empty;
+            _gmailAppPassword = configuration["Email:GmailAppPassword"] ?? string.Empty;
+            _fromName = configuration["Email:FromName"] ?? "SmartWash";
+            _enabled = configuration.GetValue<bool>("Email:Enabled");
         }
 
-        public async Task SendStatusEmail(string toEmail, string customerName, long orderId, string service, double weight, double total, string status)
+        public async Task SendStatusEmail(string toEmail, string customerName, string orderId, string service, string detergent, decimal? weight, decimal? total, string status)
         {
+            if (!_enabled) return;
             var statusInfo = GetStatusInfo(status);
+            var weightDisplay = weight.HasValue ? $"{weight.Value:F1} kg" : "Pending measurement";
+            var totalDisplay = total.HasValue ? $"₱{total.Value:F2}" : "Pending measurement";
 
             var subject = statusInfo.Subject;
             var body = $@"
@@ -51,12 +56,16 @@ namespace SmartWash.Services
 <td style='padding:8px 0;color:#0f172a;font-size:13px;font-weight:bold;text-align:right;border-top:1px solid #e2e8f0;'>{service}</td>
 </tr>
 <tr>
+<td style='padding:8px 0;color:#64748b;font-size:13px;border-top:1px solid #e2e8f0;'>Detergent</td>
+<td style='padding:8px 0;color:#0f172a;font-size:13px;font-weight:bold;text-align:right;border-top:1px solid #e2e8f0;'>{detergent}</td>
+</tr>
+<tr>
 <td style='padding:8px 0;color:#64748b;font-size:13px;border-top:1px solid #e2e8f0;'>Weight</td>
-<td style='padding:8px 0;color:#0f172a;font-size:13px;font-weight:bold;text-align:right;border-top:1px solid #e2e8f0;'>{weight:F1} kg</td>
+<td style='padding:8px 0;color:#0f172a;font-size:13px;font-weight:bold;text-align:right;border-top:1px solid #e2e8f0;'>{weightDisplay}</td>
 </tr>
 <tr>
 <td style='padding:8px 0;color:#64748b;font-size:13px;border-top:1px solid #e2e8f0;'>Total</td>
-<td style='padding:8px 0;color:#2563EB;font-size:15px;font-weight:bold;text-align:right;border-top:1px solid #e2e8f0;'>₱{total:F2}</td>
+<td style='padding:8px 0;color:#2563EB;font-size:15px;font-weight:bold;text-align:right;border-top:1px solid #e2e8f0;'>{totalDisplay}</td>
 </tr>
 <tr>
 <td style='padding:8px 0;color:#64748b;font-size:13px;border-top:1px solid #e2e8f0;'>Status</td>
@@ -97,9 +106,9 @@ namespace SmartWash.Services
             return status switch
             {
                 "Pending" => ("✅ Order Placed — SmartWash", "Your order has been placed successfully! We're preparing to pick up your laundry soon."),
-                "Rider Assigned" => ("🏍️ Rider is heading to you!", "Great news! A rider has been assigned and is on the way to pick up your laundry."),
-                "Picked Up" => ("📦 Your laundry has been picked up", "Your laundry has been picked up by our rider and is heading to the warehouse."),
+                "Picked Up" => ("🏍️ Your laundry has been picked up", "Your laundry has been picked up by our rider and is heading to the warehouse."),
                 "At Warehouse" => ("🏭 Your laundry arrived at our warehouse", "Your laundry has arrived at our warehouse and will be processed shortly."),
+                "Weighed & Measured" => ("⚖️ Invoice Ready — here's your total", "Your laundry has been weighed and your invoice is ready. Check the details below!"),
                 "Washing" => ("🫧 We're washing your clothes now", "Your clothes are being washed with care right now. Sit back and relax!"),
                 "Ready for Delivery" => ("✨ Your laundry is clean & ready!", "Your laundry is fresh, clean, and ready to be delivered back to you!"),
                 "Out for Delivery" => ("🚀 Your laundry is on its way back!", "Your clean laundry is on its way! Our rider is heading to your delivery address now."),

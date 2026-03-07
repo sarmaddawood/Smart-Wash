@@ -7,60 +7,66 @@ namespace SmartWash.Models
     public class Order : BaseModel
     {
         [PrimaryKey("id")]
-        public long Id { get; set; }
+        public string Id { get; set; } = string.Empty;
 
         [Column("customer_id")]
-        public string CustomerId { get; set; }
+        public string? CustomerId { get; set; }
 
         [Column("service_id")]
-        public long ServiceId { get; set; }
+        public string? ServiceId { get; set; }
 
         [Column("staff_id")]
-        public string StaffId { get; set; }
-
-        [Column("rider_id")]
-        public string RiderId { get; set; }
+        public string? StaffId { get; set; }
 
         [Column("warehouse_id")]
-        public long? WarehouseId { get; set; }
+        public string? WarehouseId { get; set; }
 
         [Column("weight_kg")]
-        public double WeightKg { get; set; }
+        public decimal? WeightKg { get; set; }
 
         [Column("total_price")]
-        public double TotalPrice { get; set; }
+        public decimal? TotalPrice { get; set; }
 
         [Column("pickup_address")]
-        public string PickupAddress { get; set; }
+        public string? PickupAddress { get; set; }
 
         [Column("pickup_lat")]
-        public double PickupLat { get; set; }
+        public double? PickupLat { get; set; }
 
         [Column("pickup_lng")]
-        public double PickupLng { get; set; }
+        public double? PickupLng { get; set; }
 
         [Column("delivery_address")]
-        public string DeliveryAddress { get; set; }
+        public string? DeliveryAddress { get; set; }
 
         [Column("delivery_lat")]
-        public double DeliveryLat { get; set; }
+        public double? DeliveryLat { get; set; }
 
         [Column("delivery_lng")]
-        public double DeliveryLng { get; set; }
+        public double? DeliveryLng { get; set; }
 
         [Column("special_instructions")]
-        public string SpecialInstructions { get; set; }
+        public string? SpecialInstructions { get; set; }
 
         [Column("status")]
-        public string Status { get; set; }
+        public string Status { get; set; } = string.Empty;
 
         [Column("pickup_date")]
-        public string PickupDate { get; set; }
+        public DateTime? PickupDate { get; set; }
 
         [Column("estimated_delivery")]
-        public string EstimatedDelivery { get; set; }
+        public DateTime? EstimatedDelivery { get; set; }
 
         [Column("created_at")]
-        public DateTime CreatedAt { get; set; }
+        public DateTime? CreatedAt { get; set; }
+
+        [Column("detergent_id")]
+        public string? DetergentId { get; set; }
+
+        [Column("pickup_rider_id")]
+        public string? PickupRiderId { get; set; }
+
+        [Column("delivery_rider_id")]
+        public string? DeliveryRiderId { get; set; }
     }
 }

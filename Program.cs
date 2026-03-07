@@ -13,8 +13,8 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-var supabaseUrl = builder.Configuration["Supabase:Url"];
-var supabaseKey = builder.Configuration["Supabase:Key"];
+var supabaseUrl = builder.Configuration["Supabase:Url"] ?? string.Empty;
+var supabaseKey = builder.Configuration["Supabase:Key"] ?? string.Empty;
 var supabaseClient = new Supabase.Client(supabaseUrl, supabaseKey);
 await supabaseClient.InitializeAsync();
 builder.Services.AddSingleton(supabaseClient);
