@@ -9,26 +9,49 @@
     var riderId = ViewBag.RiderId as string;
 }
 
-<div class="container-fluid py-3">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="mb-0">Rider Dashboard</h1>
-        <div class="text-muted fs-12">Welcome, @ViewBag.UserName</div>
+<div class="sw-page-header">
+    <div class="container d-flex flex-wrap justify-content-between align-items-center">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">Rider Dashboard 🛵</h2>
+            <p class="text-muted mb-0">Welcome back, @ViewBag.UserName</p>
+        </div>
+    </div>
+</div>
+
+<div class="d-flex bg-white" style="min-height: 80vh;">
+    <!-- Sidebar -->
+    <div class="sw-admin-sidebar d-none d-lg-block border-end py-4" style="width: 260px; min-width: 260px; background: var(--sw-white);">
+        <div class="px-4 mb-3"><span class="small fw-bold text-muted text-uppercase" style="letter-spacing:1px;">Jobs</span></div>
+        <a class="sw-sidebar-link active" onclick="showSection('pickups',this)"><i class="bi bi-box-seam"></i>Available Pickups</a>
+        <a class="sw-sidebar-link" onclick="showSection('deliveries',this)"><i class="bi bi-truck"></i>Available Deliveries</a>
+        <a class="sw-sidebar-link" onclick="showSection('active',this)"><i class="bi bi-person-lines-fill"></i>My Active Jobs</a>
     </div>
 
-    <div class="card animate-stagger delay-1 p-3 mb-4">
-        <ul class="nav nav-tabs mb-3" id="riderTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active fs-12 fw-bold text-uppercase" id="pickups-tab" data-bs-toggle="tab" data-bs-target="#pickups" type="button" role="tab">Available Pickups</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link fs-12 fw-bold text-uppercase" id="deliveries-tab" data-bs-toggle="tab" data-bs-target="#deliveries" type="button" role="tab">Available Deliveries</button>
-            </li>
-        </ul>
-        <div class="tab-content" id="riderTabsContent">
-            <div class="tab-pane fade show active" id="pickups" role="tabpanel">
+    <!-- Main Content Area -->
+    <div class="flex-fill p-4" style="background: var(--sw-bg);">
+        <!-- Mobile Sidebar Toggle -->
+        <div class="d-lg-none mb-3">
+            <button class="btn btn-outline-primary w-100 bg-white" style="border-radius:var(--sw-radius-sm);" type="button" data-bs-toggle="collapse" data-bs-target="#mobileSidebar">
+                <i class="bi bi-list me-2"></i>Navigation
+            </button>
+            <div class="collapse mt-2" id="mobileSidebar">
+                <div class="sw-card p-3">
+                    <div class="d-flex flex-wrap gap-2">
+                        <button class="btn btn-sm btn-primary" style="border-radius:50px;" onclick="showSection('pickups',this)"><i class="bi bi-box-seam me-1"></i>Pickups</button>
+                        <button class="btn btn-sm btn-outline-primary" style="border-radius:50px;" onclick="showSection('deliveries',this)"><i class="bi bi-truck me-1"></i>Deliveries</button>
+                        <button class="btn btn-sm btn-outline-primary" style="border-radius:50px;" onclick="showSection('active',this)"><i class="bi bi-person-lines-fill me-1"></i>Active</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section: Available Pickups -->
+        <div id="section-pickups" class="admin-section">
+            <h4 class="mb-3 fw-bold">Available Pickups</h4>
+            <div class="sw-card animate-stagger delay-1 p-3">
                 <div class="table-responsive">
-                    <table class="table table-sm table-hover text-nowrap mb-0">
-                        <thead class="table-light">
+                    <table class="sw-table table-hover text-nowrap mb-0">
+                        <thead>
                             <tr>
                                 <th class="fs-12 text-muted text-uppercase">Order ID</th>
                                 <th class="fs-12 text-muted text-uppercase">Customer</th>
@@ -49,22 +72,27 @@
                                     <td>@order.PickupDate?.ToString("MMM dd, yyyy")</td>
                                     <td>@(serviceDict.ContainsKey(order.ServiceId ?? "") ? serviceDict[order.ServiceId!] : "Unknown")</td>
                                     <td>
-                                        <a href="@Url.Action("OrderDetail", "Rider", new { id = order.Id })" class="btn btn-primary btn-sm">View & Accept</a>
+                                        <a href="@Url.Action("OrderDetail", "Rider", new { id = order.Id })" class="sw-btn sw-btn-primary p-1 px-3" style="font-size: 0.85rem; min-height: 32px;">View & Accept</a>
                                     </td>
                                 </tr>
                             }
                             @if (!pendingOrders.Any())
                             {
-                                <tr><td colspan="6" class="text-center py-3 text-muted">No available pickups.</td></tr>
+                                <tr><td colspan="6" class="text-center py-5 text-muted"><i class="bi bi-box-seam fs-2 mb-2 d-block"></i>No available pickups.</td></tr>
                             }
                         </tbody>
                     </table>
                 </div>
             </div>
-            <div class="tab-pane fade" id="deliveries" role="tabpanel">
+        </div>
+
+        <!-- Section: Available Deliveries -->
+        <div id="section-deliveries" class="admin-section d-none">
+            <h4 class="mb-3 fw-bold">Available Deliveries</h4>
+            <div class="sw-card animate-stagger delay-2 p-3">
                 <div class="table-responsive">
-                    <table class="table table-sm table-hover text-nowrap mb-0">
-                        <thead class="table-light">
+                    <table class="sw-table table-hover text-nowrap mb-0">
+                        <thead>
                             <tr>
                                 <th class="fs-12 text-muted text-uppercase">Order ID</th>
                                 <th class="fs-12 text-muted text-uppercase">Customer</th>
@@ -83,13 +111,59 @@
                                     <td class="text-truncate" style="max-width: 200px;">@order.DeliveryAddress</td>
                                     <td>@(serviceDict.ContainsKey(order.ServiceId ?? "") ? serviceDict[order.ServiceId!] : "Unknown")</td>
                                     <td>
-                                        <a href="@Url.Action("OrderDetail", "Rider", new { id = order.Id })" class="btn btn-primary btn-sm">View & Accept</a>
+                                        <a href="@Url.Action("OrderDetail", "Rider", new { id = order.Id })" class="sw-btn sw-btn-primary p-1 px-3" style="font-size: 0.85rem; min-height: 32px;">View & Accept</a>
                                     </td>
                                 </tr>
                             }
                             @if (!readyOrders.Any())
                             {
-                                <tr><td colspan="5" class="text-center py-3 text-muted">No available deliveries.</td></tr>
+                                <tr><td colspan="5" class="text-center py-5 text-muted"><i class="bi bi-truck fs-2 mb-2 d-block"></i>No available deliveries.</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section: My Active Jobs -->
+        <div id="section-active" class="admin-section d-none">
+            <h4 class="mb-3 fw-bold">My Active Jobs</h4>
+            <div class="sw-card animate-stagger delay-3 p-3">
+                <div class="table-responsive">
+                    <table class="sw-table table-hover text-nowrap mb-0">
+                        <thead>
+                            <tr>
+                                <th class="fs-12 text-muted text-uppercase">Order ID</th>
+                                <th class="fs-12 text-muted text-uppercase">Customer</th>
+                                <th class="fs-12 text-muted text-uppercase">Type</th>
+                                <th class="fs-12 text-muted text-uppercase">Status</th>
+                                <th class="fs-12 text-muted text-uppercase">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var order in activeJobs)
+                            {
+                                var customer = profileDict.ContainsKey(order.CustomerId ?? "") ? profileDict[order.CustomerId!] : null;
+                                var isPickup = order.PickupRiderId == riderId;
+                                <tr>
+                                    <td>@order.Id.Substring(0, 8)...</td>
+                                    <td>@(customer?.FullName ?? "Unknown")</td>
+                                    <td>
+                                        <span class="sw-status-badge @(isPickup ? "sw-status-pending" : "sw-status-ready-for-delivery")">
+                                            @(isPickup ? "Pickup" : "Delivery")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="sw-status-badge sw-status-@order.Status.Replace(" ", "-").ToLower()">@order.Status</span>
+                                    </td>
+                                    <td>
+                                        <a href="@Url.Action("OrderDetail", "Rider", new { id = order.Id })" class="sw-btn sw-btn-outline p-1 px-3" style="font-size: 0.85rem; min-height: 32px;">Manage</a>
+                                    </td>
+                                </tr>
+                            }
+                            @if (!activeJobs.Any())
+                            {
+                                <tr><td colspan="5" class="text-center py-5 text-muted"><i class="bi bi-person-lines-fill fs-2 mb-2 d-block"></i>You have no active jobs.</td></tr>
                             }
                         </tbody>
                     </table>
@@ -97,47 +171,25 @@
             </div>
         </div>
     </div>
-
-    <h2 class="mb-3">My Active Jobs</h2>
-    <div class="card animate-stagger delay-2 p-3">
-        <div class="table-responsive">
-            <table class="table table-sm table-hover text-nowrap mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th class="fs-12 text-muted text-uppercase">Order ID</th>
-                        <th class="fs-12 text-muted text-uppercase">Customer</th>
-                        <th class="fs-12 text-muted text-uppercase">Type</th>
-                        <th class="fs-12 text-muted text-uppercase">Status</th>
-                        <th class="fs-12 text-muted text-uppercase">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var order in activeJobs)
-                    {
-                        var customer = profileDict.ContainsKey(order.CustomerId ?? "") ? profileDict[order.CustomerId!] : null;
-                        var isPickup = order.PickupRiderId == riderId;
-                        <tr>
-                            <td>@order.Id.Substring(0, 8)...</td>
-                            <td>@(customer?.FullName ?? "Unknown")</td>
-                            <td>
-                                <span class="badge @(isPickup ? "bg-info" : "bg-warning") text-dark rounded-pill fs-12">
-                                    @(isPickup ? "Pickup" : "Delivery")
-                                </span>
-                            </td>
-                            <td>
-                                <span class="badge bg-secondary rounded-pill fs-12">@order.Status</span>
-                            </td>
-                            <td>
-                                <a href="@Url.Action("OrderDetail", "Rider", new { id = order.Id })" class="btn btn-outline-primary btn-sm">Manage</a>
-                            </td>
-                        </tr>
-                    }
-                    @if (!activeJobs.Any())
-                    {
-                        <tr><td colspan="5" class="text-center py-3 text-muted">You have no active jobs.</td></tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    </div>
 </div>
+
+@section Scripts {
+<script>
+    function showSection(name, el) {
+        document.querySelectorAll('.admin-section').forEach(s => s.classList.add('d-none'));
+        document.getElementById('section-' + name).classList.remove('d-none');
+        document.querySelectorAll('.sw-sidebar-link').forEach(l => l.classList.remove('active'));
+        if (el && el.classList.contains('sw-sidebar-link')) el.classList.add('active');
+
+        // Update mobile buttons
+        document.querySelectorAll('#mobileSidebar .btn').forEach(btn => {
+            btn.classList.remove('btn-primary');
+            btn.classList.add('btn-outline-primary');
+        });
+        if (el && Array.from(el.parentNode.children).includes(el) === false) {
+             el.classList.remove('btn-outline-primary');
+             el.classList.add('btn-primary');
+        }
+    }
+</script>
+}

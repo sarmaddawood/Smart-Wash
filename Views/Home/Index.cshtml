@@ -6,8 +6,8 @@
 
 @foreach (var ann in announcements)
 {
-    <div class="alert alert-primary alert-dismissible fade show mb-0 sw-announcement-banner" role="alert">
-        <div class="container d-flex align-items-center">
+    <div class="alert alert-primary alert-dismissible fade show mb-0 sw-announcement-banner rounded-0 text-center" role="alert" style="border:none;">
+        <div class="container d-flex align-items-center justify-content-center">
             <i class="bi bi-megaphone-fill me-2"></i>
             <strong class="me-2">@ann.Title</strong> @ann.Message
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -15,115 +15,61 @@
     </div>
 }
 
-<section class="sw-hero">
+<section class="sw-hero" id="home">
     <div class="container sw-hero-content">
         <div class="row align-items-center g-5">
-            <div class="col-lg-6">
-                <div class="sw-hero-pill mb-3">
-                    <i class="bi bi-stars"></i> Philippines' #1 Laundry Service
-                </div>
+            <div class="col-lg-7 text-center text-lg-start pe-lg-5">
                 <h1 class="sw-hero-title mb-3">
-                    Fresh Clothes,<br />
-                    <span style="color: #60a5fa;">Zero Effort.</span>
+                    Fresh Clothes, <br />
+                    <span style="color: var(--sw-primary);">Zero Effort.</span>
                 </h1>
-                <p class="sw-hero-subtitle mb-4">
+                <p class="sw-hero-subtitle mb-4 mx-auto mx-lg-0">
                     Just weigh, book, and relax. We pick up your dirty laundry and deliver it back fresh, clean, and perfectly folded — right to your doorstep.
                 </p>
-                <div class="d-flex gap-3 flex-wrap mb-4">
-                    <a href="/Order/Place" class="sw-btn sw-btn-primary sw-btn-pulse px-4">
-                        <i class="bi bi-basket-fill"></i> Book Now
-                    </a>
-                    <a href="#services" class="sw-btn sw-btn-outline px-4">
-                        <i class="bi bi-tag"></i> See Pricing
-                    </a>
-                </div>
-                <div class="sw-hero-stats">
-                    <div class="sw-hero-stat">
-                        <span class="sw-hero-stat-value">2,400+</span>
-                        <span class="sw-hero-stat-label">Orders Done</span>
-                    </div>
-                    <div class="sw-hero-stat">
-                        <span class="sw-hero-stat-value">⭐ 4.9</span>
-                        <span class="sw-hero-stat-label">Rating</span>
-                    </div>
-                    <div class="sw-hero-stat">
-                        <span class="sw-hero-stat-value">24hr</span>
-                        <span class="sw-hero-stat-label">Turnaround</span>
-                    </div>
-                    <div class="sw-hero-stat">
-                        <span class="sw-hero-stat-value">100%</span>
-                        <span class="sw-hero-stat-label">Satisfaction</span>
-                    </div>
-                </div>
+                <a href="/Auth/Register" class="sw-btn sw-btn-primary px-4 py-2" style="font-size: 1rem;">
+                    Register Now
+                </a>
             </div>
-            <div class="col-lg-6 text-center">
-                <img src="https://images.unsplash.com/photo-1545173168-9f1947eebb7f?w=600&h=500&fit=crop" alt="Fresh clean laundry" class="sw-hero-img" />
+            <div class="col-lg-5 text-center mt-5 mt-lg-0">
+                <img src="https://images.unsplash.com/photo-1545173168-9f1947eebb7f?w=600&h=500&fit=crop" alt="Hero illustration" class="img-fluid bg-transparent" style="max-height:400px; border-radius: 8px;" />
             </div>
         </div>
     </div>
 </section>
 
-<section class="sw-stats-bar">
-    <div class="container">
-        <div class="row g-4 text-center">
-            <div class="col-6 col-lg-3">
-                <div class="sw-stat-item">
-                    <div class="sw-stat-icon">📦</div>
-                    <span class="sw-stat-value">2,400+</span>
-                    <span class="sw-stat-label">Orders Completed</span>
-                </div>
-            </div>
-            <div class="col-6 col-lg-3">
-                <div class="sw-stat-item">
-                    <div class="sw-stat-icon">⭐</div>
-                    <span class="sw-stat-value">4.9 Rating</span>
-                    <span class="sw-stat-label">From Happy Customers</span>
-                </div>
-            </div>
-            <div class="col-6 col-lg-3">
-                <div class="sw-stat-item">
-                    <div class="sw-stat-icon">📍</div>
-                    <span class="sw-stat-value">Metro Manila</span>
-                    <span class="sw-stat-label">& Nearby Provinces</span>
-                </div>
-            </div>
-            <div class="col-6 col-lg-3">
-                <div class="sw-stat-item">
-                    <div class="sw-stat-icon">🚀</div>
-                    <span class="sw-stat-value">Same-Day</span>
-                    <span class="sw-stat-label">Available for Express</span>
-                </div>
-            </div>
+<section class="py-5" style="background:var(--sw-white);">
+    <div class="container text-center py-4">
+        <h2 class="fw-bold fs-3 mb-2" style="color:var(--sw-gray-600);">Our Clients</h2>
+        <p class="mb-4" style="color:var(--sw-gray-400);">We have been working with some Fortune 500+ clients</p>
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-4 my-5 px-lg-4">
+            <i class="bi bi-asterisk fs-1" style="color:var(--sw-gray-200);"></i>
+            <i class="bi bi-bezier fs-1" style="color:var(--sw-gray-200);"></i>
+            <i class="bi bi-box-fill fs-1" style="color:var(--sw-gray-200);"></i>
+            <i class="bi bi-camera-reels-fill fs-1" style="color:var(--sw-gray-200);"></i>
+            <i class="bi bi-command fs-1" style="color:var(--sw-gray-200);"></i>
+            <i class="bi bi-infinity fs-1" style="color:var(--sw-gray-200);"></i>
+            <i class="bi bi-hexagon-fill fs-1" style="color:var(--sw-gray-200);"></i>
         </div>
     </div>
 </section>
 
-<section id="services" class="py-5 sw-section">
-    <div class="container">
-        <div class="text-center mb-5">
-            <span class="sw-section-badge"><i class="bi bi-stars"></i> Our Services</span>
-            <h2 class="sw-section-title text-center">Professional Laundry Care</h2>
-            <p class="text-muted mx-auto mt-3" style="max-width:500px;">Choose from our range of premium laundry services — expert care for every fabric type.</p>
-        </div>
-        <div class="row g-4">
+<section id="services" class="py-5" style="background:var(--sw-white);">
+    <div class="container text-center px-lg-5">
+        <h2 class="fw-bold fs-2 mb-2" style="color:var(--sw-gray-600); max-width: 500px; margin: 0 auto;">Professional Laundry Care</h2>
+        <p class="mb-5" style="color:var(--sw-gray-400);">Choose from our range of premium laundry services</p>
+        <div class="row g-5">
             @foreach (var svc in services)
             {
-                <div class="col-12 col-md-6 col-lg-4">
-                    <div class="sw-service-card h-100">
-                        <span class="sw-verified-badge"><i class="bi bi-check-circle-fill me-1"></i>Verified</span>
-                        <div class="p-4 text-center">
-                            <div class="sw-service-icon-wrap">@svc.Icon</div>
-                            <h5 class="fw-bold mb-2">@svc.Name</h5>
-                            <p class="text-muted small mb-3" style="min-height:40px;">@svc.Description</p>
-                            <div class="d-flex justify-content-center gap-2 mb-2">
-                                <span class="sw-price-tag">₱@svc.PricePerKg/kg</span>
-                                <span class="sw-max-tag">Up to @svc.MaxKg kg</span>
+                <div class="col-md-4">
+                    <div class="px-3">
+                        <div class="mb-3 d-inline-block position-relative">
+                            <div class="fs-1 d-flex align-items-center justify-content-center position-relative" style="width: 60px; height: 60px; z-index: 2; margin: 0 auto; color:var(--sw-success);">
+                                @Html.Raw(svc.Icon)
                             </div>
-                            <div class="sw-rating mb-3">⭐⭐⭐⭐⭐ <span class="text-muted ms-1">4.9</span></div>
-                            <a href="/Order/Place" class="sw-btn sw-btn-primary w-100">
-                                <i class="bi bi-cart-plus"></i> Book Now
-                            </a>
+                            <div class="position-absolute" style="width:45px; height:45px; background:var(--sw-success-light); top:5px; right:-15px; border-top-left-radius: 15px; border-bottom-right-radius: 15px; border-top-right-radius: 5px; border-bottom-left-radius: 5px; z-index:1;"></div>
                         </div>
+                        <h4 class="fw-bold fs-4 mb-2" style="color:var(--sw-gray-600);">@svc.Name</h4>
+                        <p style="color:var(--sw-gray-400); font-size:0.9rem;">@svc.Description</p>
                     </div>
                 </div>
             }
@@ -131,137 +77,67 @@
     </div>
 </section>
 
-<section class="py-5 sw-section-alt">
-    <div class="container">
-        <div class="text-center mb-5">
-            <span class="sw-section-badge"><i class="bi bi-box"></i> Weight Guide</span>
-            <h2 class="sw-section-title text-center">Know Your Laundry Weight</h2>
-        </div>
-        <div class="row g-3 justify-content-center">
-            <div class="col-6 col-md-4 col-lg-2">
-                <div class="sw-weight-card text-center p-3">
-                    <span class="fs-1">👕</span>
-                    <p class="fw-semibold mb-0 small mt-1">T-shirt</p>
-                    <span class="text-primary fw-bold">~0.2kg</span>
-                </div>
+<section class="py-5" style="background:var(--sw-white);">
+    <div class="container py-lg-4">
+        <div class="row g-5 align-items-center">
+            <div class="col-lg-5 text-center px-4">
+                <img src="https://images.unsplash.com/photo-1544441893-675973e31985?w=500&h=500&fit=crop" alt="Illustration" class="img-fluid" style="border-radius:12px; box-shadow:var(--sw-shadow-lg);" />
             </div>
-            <div class="col-6 col-md-4 col-lg-2">
-                <div class="sw-weight-card text-center p-3">
-                    <span class="fs-1">👖</span>
-                    <p class="fw-semibold mb-0 small mt-1">Jeans</p>
-                    <span class="text-primary fw-bold">~0.7kg</span>
+            <div class="col-lg-7 ps-lg-5">
+                <h2 class="fw-bold mb-3 pe-lg-5" style="color:var(--sw-gray-600); font-size: 2.2rem; line-height: 1.2;">
+                    Simple as 1-2-3-4:<br/>How SmartWash Works
+                </h2>
+                <div style="color:var(--sw-gray-400); font-size:0.95rem; line-height:1.6;" class="mb-4 pe-lg-5">
+                    <p class="mb-3">SmartWash simplifies laundry with a clear, fast, and transparent process that fits your busy life style. Stop worrying about doing your laundry and let the experts handle it.</p>
+                    <p class="mb-2"><strong>1. Weigh:</strong> Estimate your laundry weight using our guide.</p>
+                    <p class="mb-2"><strong>2. Pick Service:</strong> Choose the perfect plan for your fabric.</p>
+                    <p class="mb-2"><strong>3. Book Slot:</strong> Pick your preferred date and time.</p>
+                    <p class="mb-0"><strong>4. We Deliver:</strong> We pick up, wash, and deliver back to you.</p>
                 </div>
-            </div>
-            <div class="col-6 col-md-4 col-lg-2">
-                <div class="sw-weight-card text-center p-3">
-                    <span class="fs-1">🧥</span>
-                    <p class="fw-semibold mb-0 small mt-1">Jacket</p>
-                    <span class="text-primary fw-bold">~1kg</span>
-                </div>
-            </div>
-            <div class="col-6 col-md-4 col-lg-2">
-                <div class="sw-weight-card text-center p-3">
-                    <span class="fs-1">🛏️</span>
-                    <p class="fw-semibold mb-0 small mt-1">Bed Sheet</p>
-                    <span class="text-primary fw-bold">~0.5kg</span>
-                </div>
-            </div>
-            <div class="col-6 col-md-4 col-lg-2">
-                <div class="sw-weight-card text-center p-3">
-                    <span class="fs-1">🧦</span>
-                    <p class="fw-semibold mb-0 small mt-1">Socks (pair)</p>
-                    <span class="text-primary fw-bold">~0.1kg</span>
-                </div>
+                <a href="/Order/Place" class="sw-btn sw-btn-primary px-4 py-2 mt-2">Book Now</a>
             </div>
         </div>
     </div>
 </section>
 
-<section id="how-it-works" class="py-5 sw-section">
-    <div class="container">
-        <div class="text-center mb-5">
-            <span class="sw-section-badge"><i class="bi bi-arrow-repeat"></i> How It Works</span>
-            <h2 class="sw-section-title text-center">Simple as 1-2-3-4</h2>
-        </div>
-        <div class="row g-4">
-            <div class="col-6 col-lg-3">
-                <div class="sw-step-card p-4 text-center h-100">
-                    <div class="sw-step-num">1</div>
-                    <i class="bi bi-speedometer fs-1 text-primary mb-2 d-block"></i>
-                    <h6 class="fw-bold">Weigh</h6>
-                    <p class="text-muted small mb-0">Estimate your laundry weight using our guide</p>
-                </div>
+<section class="py-5" style="background:var(--sw-bg);">
+    <div class="container py-lg-4">
+        <div class="row g-5 align-items-center">
+            <div class="col-lg-6">
+                <h2 class="fw-bold mb-1" style="color:var(--sw-gray-600); font-size: 2.3rem;">
+                    Helping local communities<br/>
+                    <span style="color:var(--sw-primary);">keep it clean and fresh</span>
+                </h2>
+                <p style="color:var(--sw-gray-800); font-size: 1rem;">We reached here with our hard work and dedication</p>
             </div>
-            <div class="col-6 col-lg-3">
-                <div class="sw-step-card p-4 text-center h-100">
-                    <div class="sw-step-num">2</div>
-                    <i class="bi bi-hand-index fs-1 text-primary mb-2 d-block"></i>
-                    <h6 class="fw-bold">Pick Service</h6>
-                    <p class="text-muted small mb-0">Choose the perfect plan for your fabric</p>
-                </div>
-            </div>
-            <div class="col-6 col-lg-3">
-                <div class="sw-step-card p-4 text-center h-100">
-                    <div class="sw-step-num">3</div>
-                    <i class="bi bi-calendar-check fs-1 text-primary mb-2 d-block"></i>
-                    <h6 class="fw-bold">Book Slot</h6>
-                    <p class="text-muted small mb-0">Pick your preferred date and time</p>
-                </div>
-            </div>
-            <div class="col-6 col-lg-3">
-                <div class="sw-step-card p-4 text-center h-100">
-                    <div class="sw-step-num">4</div>
-                    <i class="bi bi-truck fs-1 text-primary mb-2 d-block"></i>
-                    <h6 class="fw-bold">We Deliver</h6>
-                    <p class="text-muted small mb-0">We pick up, wash, and deliver back to you</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<section class="py-5 sw-section-alt">
-    <div class="container">
-        <div class="text-center mb-5">
-            <span class="sw-section-badge"><i class="bi bi-chat-quote"></i> Reviews</span>
-            <h2 class="sw-section-title text-center">What Our Customers Say</h2>
-        </div>
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="sw-review-card p-4 h-100">
-                    <div class="sw-rating mb-2">⭐⭐⭐⭐⭐</div>
-                    <p class="text-muted small mb-3">"Sobrang galing ng SmartWash! My clothes came back smelling amazing and perfectly folded. Super convenient ng pickup and delivery!"</p>
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="sw-review-avatar">MC</div>
+            <div class="col-lg-6">
+                <div class="row g-4 pt-lg-2 ms-lg-4">
+                    <div class="col-6 d-flex align-items-center gap-3">
+                        <i class="bi bi-people fs-1" style="color:var(--sw-primary);"></i>
                         <div>
-                            <h6 class="fw-bold mb-0 small">Maria Clara Santos</h6>
-                            <span class="text-muted" style="font-size:0.75rem;"><i class="bi bi-geo-alt"></i> Makati City</span>
+                            <h3 class="fw-bold mb-0" style="color:var(--sw-gray-600); font-size:1.7rem;">2,400+</h3>
+                            <span style="color:var(--sw-gray-400); font-size:0.85rem;">Orders Completed</span>
                         </div>
                     </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="sw-review-card p-4 h-100">
-                    <div class="sw-rating mb-2">⭐⭐⭐⭐⭐</div>
-                    <p class="text-muted small mb-3">"As a busy professional, SmartWash saves me so much time. Express service is a lifesaver — same day delivery talaga! Highly recommended."</p>
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="sw-review-avatar">JR</div>
+                    <div class="col-6 d-flex align-items-center gap-3">
+                        <i class="bi bi-star flex-shrink-0 fs-1" style="color:var(--sw-primary);"></i>
                         <div>
-                            <h6 class="fw-bold mb-0 small">Juan Reyes Jr.</h6>
-                            <span class="text-muted" style="font-size:0.75rem;"><i class="bi bi-geo-alt"></i> Quezon City</span>
+                            <h3 class="fw-bold mb-0" style="color:var(--sw-gray-600); font-size:1.7rem;">4.9</h3>
+                            <span style="color:var(--sw-gray-400); font-size:0.85rem;">Average Rating</span>
                         </div>
                     </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="sw-review-card p-4 h-100">
-                    <div class="sw-rating mb-2">⭐⭐⭐⭐⭐</div>
-                    <p class="text-muted small mb-3">"Affordable prices and top-notch quality. My family's laundry is always fresh. Reliable rider din! Will never go back to doing laundry myself."</p>
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="sw-review-avatar">AG</div>
+                    <div class="col-6 d-flex align-items-center gap-3">
+                        <i class="bi bi-geo-alt fs-1" style="color:var(--sw-primary);"></i>
                         <div>
-                            <h6 class="fw-bold mb-0 small">Ana Garcia Lim</h6>
-                            <span class="text-muted" style="font-size:0.75rem;"><i class="bi bi-geo-alt"></i> Pasig City</span>
+                            <h3 class="fw-bold mb-0" style="color:var(--sw-gray-600); font-size:1.7rem;">12+</h3>
+                            <span style="color:var(--sw-gray-400); font-size:0.85rem;">Areas Served</span>
+                        </div>
+                    </div>
+                    <div class="col-6 d-flex align-items-center gap-3">
+                        <i class="bi bi-rocket fs-1" style="color:var(--sw-primary);"></i>
+                        <div>
+                            <h3 class="fw-bold mb-0" style="color:var(--sw-gray-600); font-size:1.7rem;">Same-Day</h3>
+                            <span style="color:var(--sw-gray-400); font-size:0.85rem;">Express Wash</span>
                         </div>
                     </div>
                 </div>
@@ -270,76 +146,106 @@
     </div>
 </section>
 
-<section class="py-4 sw-section">
-    <div class="container">
-        <div class="row g-3 justify-content-center">
-            <div class="col-md-4">
-                <div class="sw-trust-badge justify-content-center">
-                    <i class="bi bi-leaf fs-5 text-success"></i>
-                    <span>Eco-Certified Detergents</span>
-                </div>
+<section class="py-5" style="background:var(--sw-white);">
+    <div class="container py-lg-4">
+        <div class="row g-5 align-items-center">
+            <div class="col-lg-5 text-center px-4 order-lg-2">
+                <img src="https://images.unsplash.com/photo-1604335399554-0ff2aa93de4c?w=500&h=500&fit=crop" alt="Illustration" class="img-fluid" style="border-radius:12px; box-shadow:var(--sw-shadow-lg);" />
             </div>
-            <div class="col-md-4">
-                <div class="sw-trust-badge justify-content-center">
-                    <i class="bi bi-patch-check-fill fs-5 text-primary"></i>
-                    <span>Licensed Business</span>
+            <div class="col-lg-7 pe-lg-5 order-lg-1">
+                <h2 class="fw-bold mb-3 pe-lg-5" style="color:var(--sw-gray-600); font-size: 2.2rem; line-height: 1.2;">
+                    How to price your laundry<br/>like we did
+                </h2>
+                <div style="color:var(--sw-gray-400); font-size:0.95rem; line-height:1.6;" class="mb-4 pe-lg-5">
+                    <p class="mb-3">SmartWash weight guides make it extremely easy to estimate your laundry correctly without surprise charges. We believe in complete transparency and building trust with every wash.</p>
+                    <p class="mb-2"><strong>T-shirt:</strong> ~0.2kg</p>
+                    <p class="mb-2"><strong>Jeans:</strong> ~0.7kg</p>
+                    <p class="mb-2"><strong>Jacket:</strong> ~1.0kg</p>
+                    <p class="mb-0"><strong>Bed Sheet:</strong> ~0.5kg</p>
                 </div>
+                <a href="#services" class="sw-btn sw-btn-primary px-4 py-2 mt-2">Learn More</a>
             </div>
-            <div class="col-md-4">
-                <div class="sw-trust-badge justify-content-center">
-                    <i class="bi bi-star-fill fs-5 text-warning"></i>
-                    <span>5-Star Rated Service</span>
+        </div>
+    </div>
+</section>
+
+<section class="py-5" style="background:var(--sw-bg);">
+    <div class="container py-lg-4">
+        <div class="row g-5 align-items-center">
+            <div class="col-lg-4 text-center">
+                <i class="bi bi-water text-primary opacity-75" style="font-size: 10rem;"></i>
+            </div>
+            <div class="col-lg-8 ps-lg-5">
+                <p style="color:var(--sw-gray-500); font-size:1rem; line-height:1.7;" class="mb-4 fw-medium">
+                    "Sobrang galing ng SmartWash! My clothes came back smelling amazing and perfectly folded. Super convenient ng pickup and delivery! As a busy professional, SmartWash saves me so much time. Express service is a lifesaver — same day delivery talaga! Highly recommended by my whole family. We will definitely use this service again."
+                </p>
+                <div class="mb-4 mt-2">
+                    <h5 class="fw-bold mb-1" style="color:var(--sw-primary); font-size: 1.2rem;">Maria Clara Santos</h5>
+                    <span style="color:var(--sw-gray-400); font-size: 0.9rem;">Makati City Customer</span>
+                </div>
+                <div class="d-flex flex-wrap gap-4 align-items-center mt-4">
+                    <i class="bi bi-flower1 fs-3" style="color:var(--sw-primary-light); filter: brightness(0.6);"></i>
+                    <i class="bi bi-balloon fs-3" style="color:var(--sw-primary-light); filter: brightness(0.6);"></i>
+                    <i class="bi bi-badge-ad fs-3" style="color:var(--sw-primary-light); filter: brightness(0.6);"></i>
+                    <i class="bi bi-bookmark-star fs-3" style="color:var(--sw-primary-light); filter: brightness(0.6);"></i>
+                    <i class="bi bi-brightness-high fs-3" style="color:var(--sw-primary-light); filter: brightness(0.6);"></i>
+                    <i class="bi bi-briefcase fs-3 d-none d-md-block" style="color:var(--sw-primary-light); filter: brightness(0.6);"></i>
+                    <a href="/Auth/Register" class="text-primary fw-semibold ms-auto text-decoration-none d-flex align-items-center gap-2">Meet all customers <i class="bi bi-arrow-right fw-bold"></i></a>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<section class="sw-cta-banner">
-    <div class="container text-center position-relative" style="z-index:2;">
-        <h2 class="text-white fw-bold display-6 mb-3">Ready for Fresh Laundry?</h2>
-        <p class="text-white opacity-75 mb-4 mx-auto" style="max-width:480px;">Let us handle the dirty work. Book your first order today and enjoy freshly cleaned, perfectly folded clothes.</p>
-        <a href="/Order/Place" class="sw-btn sw-btn-white px-5 py-3 fs-6">
-            <i class="bi bi-basket-fill"></i> Book Now — It's Easy
+<section class="py-5 pb-lg-5" style="background:var(--sw-white);">
+    <div class="container pb-lg-5 text-center mt-3">
+        <h2 class="fw-bold mb-3" style="color:var(--sw-gray-600); font-size: 2.2rem;">Caring is the new marketing</h2>
+        <p class="mx-auto pe-lg-3 ps-lg-3 mb-5" style="color:var(--sw-gray-400); font-size: 1rem; max-width: 600px; line-height: 1.6;">
+            The SmartWash blog is the best place to read about the latest laundry insights, fabric care trends and more. See who's joining the community, read about how our community are increasing their membership income and lot's more.
+        </p>
+        <div class="row g-4 justify-content-center px-lg-4">
+            
+            <div class="col-md-4 px-lg-3">
+                <div class="position-relative text-center mx-auto" style="max-width: 350px;">
+                    <img src="https://images.unsplash.com/photo-1545173168-9f1947eebb7f?w=400&h=300&fit=crop" class="img-fluid rounded-3" alt="Blog 1" style="width: 100%; aspect-ratio: 4/3; object-fit: cover;" />
+                    <div class="bg-white p-4 rounded-3 shadow-sm mx-auto position-relative" style="width: 85%; margin-top: -60px; border: 1px solid rgba(0,0,0,0.02); z-index: 10;">
+                        <h6 class="fw-bold mb-3 text-start px-2" style="color:var(--sw-gray-500); font-size: 1rem; line-height: 1.4;">Creating Streamlined Safeguarding Processes with OneRen</h6>
+                        <a href="#" class="text-primary text-decoration-none fw-bold fs-6 mt-1 flex align-items-center justify-content-center gap-2">Readmore <i class="bi bi-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 px-lg-3">
+                <div class="position-relative text-center mx-auto" style="max-width: 350px;">
+                    <img src="https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=400&h=300&fit=crop" class="img-fluid rounded-3" alt="Blog 2" style="width: 100%; aspect-ratio: 4/3; object-fit: cover;" />
+                    <div class="bg-white p-4 rounded-3 shadow-sm mx-auto position-relative" style="width: 85%; margin-top: -60px; border: 1px solid rgba(0,0,0,0.02); z-index: 10;">
+                        <h6 class="fw-bold mb-3 text-start px-2" style="color:var(--sw-gray-500); font-size: 1rem; line-height: 1.4;">What are your safeguarding responsibilities and how can you manage them?</h6>
+                        <a href="#" class="text-primary text-decoration-none fw-bold fs-6 mt-1 flex align-items-center justify-content-center gap-2">Readmore <i class="bi bi-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 px-lg-3">
+                <div class="position-relative text-center mx-auto" style="max-width: 350px;">
+                    <img src="https://images.unsplash.com/photo-1604335399554-0ff2aa93de4c?w=400&h=300&fit=crop" class="img-fluid rounded-3" alt="Blog 3" style="width: 100%; aspect-ratio: 4/3; object-fit: cover;" />
+                    <div class="bg-white p-4 rounded-3 shadow-sm mx-auto position-relative" style="width: 85%; margin-top: -60px; border: 1px solid rgba(0,0,0,0.02); z-index: 10;">
+                        <h6 class="fw-bold mb-3 text-start px-2" style="color:var(--sw-gray-500); font-size: 1rem; line-height: 1.4;">Revamping the Membership Model with Triathlon Australia</h6>
+                        <a href="#" class="text-primary text-decoration-none fw-bold fs-6 mt-1 flex align-items-center justify-content-center gap-2">Readmore <i class="bi bi-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<section class="py-5" style="background:var(--sw-bg);">
+    <div class="container py-lg-5 text-center mt-3 mb-3">
+        <h1 class="fw-bold mb-5 mx-auto" style="color:var(--sw-gray-800); font-size: 3.5rem; max-width: 800px; line-height: 1.2;">
+            Pellentesque suscipit<br/>fringilla libero eu.
+        </h1>
+        <a href="/Order/Place" class="sw-btn sw-btn-primary px-5 py-3 d-inline-flex gap-2 align-items-center rounded-2" style="font-size: 1.1rem; height: auto;">
+            Get a Demo <i class="bi bi-arrow-right fw-bold"></i>
         </a>
-    </div>
-</section>
-
-<section class="py-5 sw-section-alt">
-    <div class="container">
-        <div class="text-center mb-5">
-            <span class="sw-section-badge"><i class="bi bi-heart"></i> Why SmartWash?</span>
-            <h2 class="sw-section-title text-center">Why Choose Us</h2>
-        </div>
-        <div class="row g-4">
-            <div class="col-6 col-lg-3">
-                <div class="sw-step-card p-4 text-center h-100 sw-card-lift">
-                    <i class="bi bi-lightning-charge-fill fs-1 text-primary mb-3 d-block"></i>
-                    <h6 class="fw-bold">Easy Pricing</h6>
-                    <p class="text-muted small mb-0">Simple per-kg pricing with no hidden fees</p>
-                </div>
-            </div>
-            <div class="col-6 col-lg-3">
-                <div class="sw-step-card p-4 text-center h-100 sw-card-lift">
-                    <i class="bi bi-geo-alt-fill fs-1 text-primary mb-3 d-block"></i>
-                    <h6 class="fw-bold">Pickup & Delivery</h6>
-                    <p class="text-muted small mb-0">Door-to-door service across Metro Manila</p>
-                </div>
-            </div>
-            <div class="col-6 col-lg-3">
-                <div class="sw-step-card p-4 text-center h-100 sw-card-lift">
-                    <i class="bi bi-droplet-fill fs-1 text-primary mb-3 d-block"></i>
-                    <h6 class="fw-bold">Eco-Friendly</h6>
-                    <p class="text-muted small mb-0">We use sustainable, eco-friendly detergents</p>
-                </div>
-            </div>
-            <div class="col-6 col-lg-3">
-                <div class="sw-step-card p-4 text-center h-100 sw-card-lift">
-                    <i class="bi bi-shield-check fs-1 text-primary mb-3 d-block"></i>
-                    <h6 class="fw-bold">100% Guaranteed</h6>
-                    <p class="text-muted small mb-0">Your satisfaction is our top priority</p>
-                </div>
-            </div>
-        </div>
     </div>
 </section>
