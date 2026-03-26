@@ -144,7 +144,15 @@
                                         <td><span class="sw-status-badge sw-status-@o.Status.Replace(" ", "-").ToLower()">@o.Status</span></td>
                                         <td>
                                             @if (hasReview)
-                                            { <span class="text-warning small">@(new string('⭐', reviewDict[o.Id].Rating))</span> }
+                                            {
+                                                <div class="d-flex align-items-center gap-1">
+                                                    <span class="text-warning small" style="letter-spacing: -2px;">@(new string('⭐', reviewDict[o.Id].Rating))</span>
+                                                    <button class="btn btn-sm btn-outline-secondary border-0 p-0" style="line-height: 1;" 
+                                                            onclick="showAdminReview('@reviewDict[o.Id].Rating', '@(reviewDict[o.Id].Comment?.Replace("'", "\\'").Replace("\r", "").Replace("\n", "\\n"))', '@(reviewDict[o.Id].CreatedAt.ToString("MMM dd, yyyy"))')">
+                                                        <i class="bi bi-info-circle" style="font-size: 0.85rem;"></i>
+                                                    </button>
+                                                </div>
+                                            }
                                             else
                                             { <span class="text-muted small">—</span> }
                                         </td>
@@ -763,6 +771,33 @@
             });
         });
     })();
+    function showAdminReview(rating, comment, date) {
+        var stars = '';
+        for (var i = 0; i < 5; i++) stars += i < rating ? '⭐' : '☆';
+        document.getElementById('adminReviewStars').innerText = stars;
+        document.getElementById('adminReviewComment').innerText = comment || 'No comment provided.';
+        document.getElementById('adminReviewDate').innerText = 'Reviewed on ' + date;
+        new bootstrap.Modal(document.getElementById('adminReviewModal')).show();
+    }
 </script>
+
+@section Modals {
+<div class="modal fade" id="adminReviewModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:var(--sw-radius-lg);">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold"><i class="bi bi-star-fill text-warning me-2"></i>Customer Review</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <div id="adminReviewStars" class="fs-2 mb-2 text-warning"></div>
+                <p id="adminReviewComment" class="text-dark fw-medium px-3"></p>
+                <hr class="my-3 mx-auto" style="width: 40px; border-top: 2px solid var(--sw-gray-200); opacity: 1;" />
+                <p id="adminReviewDate" class="small text-muted mb-0"></p>
+            </div>
+        </div>
+    </div>
+</div>
+}
 }
 

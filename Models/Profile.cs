@@ -6,7 +6,7 @@ namespace SmartWash.Models
     [Table("profiles")]
     public class Profile : BaseModel
     {
-        [PrimaryKey("id")]
+        [PrimaryKey("id", false)]
         public string Id { get; set; } = string.Empty;
 
         [Column("full_name")]

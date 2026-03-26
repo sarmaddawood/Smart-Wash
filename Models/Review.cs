@@ -6,7 +6,7 @@ namespace SmartWash.Models
     [Table("reviews")]
     public class Review : BaseModel
     {
-        [PrimaryKey("id")]
+        [PrimaryKey("id", false)]
         public string Id { get; set; } = string.Empty;
 
         [Column("order_id")]
