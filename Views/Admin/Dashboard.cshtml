@@ -201,7 +201,7 @@
                                     <tr>
                                         <td class="fw-semibold">@c.FullName</td>
                                         <td class="small">@c.Email</td>
-                                        <td class="small">+63 @c.Phone</td>
+                                        <td class="small">+63 @(c.Phone?.Length >= 10 ? c.Phone.Substring(c.Phone.Length - 10) : c.Phone)</td>
                                         <td class="small">@c.CreatedAt.ToString("MMM dd, yyyy")</td>
                                     </tr>
                                 }
@@ -227,7 +227,7 @@
                                     <tr>
                                         <td class="fw-semibold">@s.FullName</td>
                                         <td class="small">@s.Email</td>
-                                        <td class="small">+63 @s.Phone</td>
+                                        <td class="small">+63 @(s.Phone?.Length >= 10 ? s.Phone.Substring(s.Phone.Length - 10) : s.Phone)</td>
                                         <td class="small">@s.CreatedAt.ToString("MMM dd, yyyy")</td>
                                     </tr>
                                 }
@@ -253,7 +253,7 @@
                                     <tr>
                                         <td class="fw-semibold">@r.FullName</td>
                                         <td class="small">@r.Email</td>
-                                        <td class="small">+63 @r.Phone</td>
+                                        <td class="small">+63 @(r.Phone?.Length >= 10 ? r.Phone.Substring(r.Phone.Length - 10) : r.Phone)</td>
                                         <td class="small">@r.CreatedAt.ToString("MMM dd, yyyy")</td>
                                     </tr>
                                 }

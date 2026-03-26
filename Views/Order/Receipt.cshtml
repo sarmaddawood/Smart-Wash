@@ -45,7 +45,7 @@
                         </div>
                         <div class="d-flex justify-content-between small mb-1">
                             <span class="text-muted">Phone</span>
-                            <span class="fw-semibold">+63 @customer?.Phone</span>
+                            <span class="fw-semibold">+63 @(customer?.Phone?.Length >= 10 ? customer.Phone.Substring(customer.Phone.Length - 10) : customer?.Phone)</span>
                         </div>
                     </div>
 

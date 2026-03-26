@@ -31,7 +31,10 @@ namespace SmartWash.Controllers
 
             ViewBag.FullName = profile.FullName ?? "";
             ViewBag.Email = profile.Email ?? "";
-            ViewBag.Phone = profile.Phone ?? "";
+            // Normalize phone for display: last 10 digits
+            var phone = profile.Phone ?? "";
+            if (phone.Length > 10) phone = phone.Substring(phone.Length - 10);
+            ViewBag.Phone = phone;
             ViewBag.Password = profile.Password; 
             ViewBag.UserRole = HttpContext.Session.GetString("UserRole") ?? "User";
             return View();
@@ -53,9 +56,13 @@ namespace SmartWash.Controllers
                 return NotFound();
             }
 
+            // Normalize phone: Keep only the last 10 digits
+            var normalizedPhone = new string((phone ?? "").Where(char.IsDigit).ToArray());
+            if (normalizedPhone.Length > 10) normalizedPhone = normalizedPhone.Substring(normalizedPhone.Length - 10);
+            
             profile.FullName = fullName;
             profile.Email = email;
-            profile.Phone = phone;
+            profile.Phone = normalizedPhone;
             profile.Password = password;
 
             await _supabase.From<Profile>().Update(profile);

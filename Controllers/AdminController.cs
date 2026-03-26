@@ -279,6 +279,11 @@ namespace SmartWash.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateAccount(string fullName, string email, string password, string phone, string roleName)
         {
+            // Normalize phone: Keep only the last 10 digits
+            var normalizedPhone = new string((phone ?? "").Where(char.IsDigit).ToArray());
+            if (normalizedPhone.Length > 10) normalizedPhone = normalizedPhone.Substring(normalizedPhone.Length - 10);
+            phone = normalizedPhone;
+
             var role = await _supabase.From<Role>()
                 .Filter("name", Operator.Equals, roleName)
                 .Single();

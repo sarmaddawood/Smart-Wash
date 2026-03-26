@@ -109,7 +109,7 @@
                     @if (customer != null)
                     {
                         <p class="small mb-1"><i class="bi bi-person me-1"></i>@customer.FullName</p>
-                        <p class="small mb-2"><i class="bi bi-telephone me-1"></i>+63 @customer.Phone</p>
+                        <p class="small mb-2"><i class="bi bi-telephone me-1"></i>+63 @(customer.Phone?.Length >= 10 ? customer.Phone.Substring(customer.Phone.Length - 10) : customer.Phone)</p>
                     }
                     @if (pickupRider != null)
                     {

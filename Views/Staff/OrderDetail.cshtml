@@ -36,7 +36,7 @@
                     <label>Customer Details</label>
                     <div class="fw-bold">@customer?.FullName ?? "N/A"</div>
                     <div class="text-muted fs-12">@customer?.Email ?? "N/A"</div>
-                    <div class="text-muted fs-12">+63 @customer?.Phone ?? "N/A"</div>
+                    <div class="text-muted fs-12">+63 @(customer?.Phone?.Length >= 10 ? customer.Phone.Substring(customer.Phone.Length - 10) : customer?.Phone ?? "N/A")</div>
                 </div>
 
                 <div class="row g-2 mb-3">
