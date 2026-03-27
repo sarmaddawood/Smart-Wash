@@ -31,7 +31,6 @@ namespace SmartWash.Controllers
 
             ViewBag.FullName = profile.FullName ?? "";
             ViewBag.Email = profile.Email ?? "";
-            // Normalize phone for display: last 10 digits
             var phone = profile.Phone ?? "";
             if (phone.Length > 10) phone = phone.Substring(phone.Length - 10);
             ViewBag.Phone = phone;
@@ -56,7 +55,6 @@ namespace SmartWash.Controllers
                 return NotFound();
             }
 
-            // Normalize phone: Keep only the last 10 digits
             var normalizedPhone = new string((phone ?? "").Where(char.IsDigit).ToArray());
             if (normalizedPhone.Length > 10) normalizedPhone = normalizedPhone.Substring(normalizedPhone.Length - 10);
             

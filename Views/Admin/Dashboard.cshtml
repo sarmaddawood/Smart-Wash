@@ -870,7 +870,6 @@
         document.getElementById('adminReviewComment').innerText = comment || 'No comment provided.';
         document.getElementById('adminReviewDate').innerText = 'Reviewed on ' + date;
         
-        // Ensure modal is shown (some browsers need manual trigger if initialized by code)
         var modalEl = document.getElementById('adminReviewModal');
         var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
         modal.show();

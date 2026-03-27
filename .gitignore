@@ -2,10 +2,11 @@
 bin/
 obj/
 
-# App Settings with secrets
+# App Settings
 appsettings.json
 appsettings.*.json
 !appsettings.example.json
+appsettings.Local.json
 
 # Visual Studio
 .vs/
@@ -37,3 +38,20 @@ logs/
 
 # Published output
 publish/
+
+# Build artifacts
+.swp
+*~
+# .NET
+[Oo]bj/
+[Bb]in/
+# User-specific files
+*.user
+*.userosscache
+*.sln.docstates
+# Visual Studio Code
+.vscode/
+# Visual Studio logic
+.vs/
+# Skill lock
+skills-lock.json
