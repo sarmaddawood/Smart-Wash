@@ -3,6 +3,7 @@
     var order = ViewBag.Order as SmartWash.Models.Order;
     var service = ViewBag.Service as SmartWash.Models.Service;
     var detergent = ViewBag.Detergent as SmartWash.Models.Detergent;
+    var conditioner = ViewBag.Conditioner as SmartWash.Models.Conditioner;
     var customer = ViewBag.Customer as SmartWash.Models.Profile;
     var pickupRider = ViewBag.PickupRider as SmartWash.Models.Profile;
     var deliveryRider = ViewBag.DeliveryRider as SmartWash.Models.Profile;
@@ -73,6 +74,10 @@
                     <div class="d-flex justify-content-between small mb-2">
                         <span class="text-muted">Detergent</span>
                         <span class="fw-semibold">@(detergent?.Name ?? "—")</span>
+                    </div>
+                    <div class="d-flex justify-content-between small mb-2">
+                        <span class="text-muted">Conditioner</span>
+                        <span class="fw-semibold">@(conditioner?.Name ?? "—")</span>
                     </div>
                     <div class="d-flex justify-content-between small mb-2">
                         <span class="text-muted">Weight</span>

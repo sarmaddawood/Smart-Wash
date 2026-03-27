@@ -68,5 +68,8 @@ namespace SmartWash.Models
 
         [Column("delivery_rider_id")]
         public string? DeliveryRiderId { get; set; }
+
+        [Column("conditioner_id")]
+        public string? ConditionerId { get; set; }
     }
 }

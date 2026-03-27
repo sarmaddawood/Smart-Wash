@@ -8,6 +8,8 @@
     var profileDict = ViewBag.ProfileDict as Dictionary<string, SmartWash.Models.Profile> ?? new Dictionary<string, SmartWash.Models.Profile>();
     var roleDict = ViewBag.RoleDict as Dictionary<string, string> ?? new Dictionary<string, string>();
     var warehouses = ViewBag.Warehouses as List<SmartWash.Models.Warehouse> ?? new List<SmartWash.Models.Warehouse>();
+    var conditioners = ViewBag.Conditioners as List<SmartWash.Models.Conditioner> ?? new List<SmartWash.Models.Conditioner>();
+    var conditionerDict = ViewBag.ConditionerDict as Dictionary<string, string> ?? new Dictionary<string, string>();
     var activeWarehouses = ViewBag.ActiveWarehouses as List<SmartWash.Models.Warehouse> ?? new List<SmartWash.Models.Warehouse>();
     var staffList = ViewBag.StaffList as List<SmartWash.Models.Profile> ?? new List<SmartWash.Models.Profile>();
     var riderList = ViewBag.RiderList as List<SmartWash.Models.Profile> ?? new List<SmartWash.Models.Profile>();
@@ -41,6 +43,7 @@
         <a class="sw-sidebar-link" onclick="showSection('services',this)"><i class="bi bi-stars"></i>Services</a>
         <a class="sw-sidebar-link" onclick="showSection('warehouses',this)"><i class="bi bi-building"></i>Warehouses</a>
         <a class="sw-sidebar-link" onclick="showSection('detergents',this)"><i class="bi bi-droplet"></i>Detergents</a>
+        <a class="sw-sidebar-link" onclick="showSection('conditioners',this)"><i class="bi bi-flower1"></i>Conditioners</a>
         <a class="sw-sidebar-link" onclick="showSection('createaccount',this)"><i class="bi bi-person-plus"></i>Create Account</a>
         <hr class="mx-4 my-3" />
         <a class="sw-sidebar-link" onclick="showSection('announcements',this)"><i class="bi bi-megaphone"></i>Announcements</a>
@@ -62,6 +65,7 @@
                         <button class="btn btn-sm btn-outline-primary" style="border-radius:50px;" onclick="showSection('services',this)"><i class="bi bi-stars me-1"></i>Services</button>
                         <button class="btn btn-sm btn-outline-primary" style="border-radius:50px;" onclick="showSection('warehouses',this)"><i class="bi bi-building me-1"></i>Warehouses</button>
                         <button class="btn btn-sm btn-outline-primary" style="border-radius:50px;" onclick="showSection('detergents',this)"><i class="bi bi-droplet me-1"></i>Detergents</button>
+                        <button class="btn btn-sm btn-outline-primary" style="border-radius:50px;" onclick="showSection('conditioners',this)"><i class="bi bi-flower1 me-1"></i>Conditioners</button>
                         <button class="btn btn-sm btn-outline-primary" style="border-radius:50px;" onclick="showSection('createaccount',this)"><i class="bi bi-person-plus me-1"></i>Create</button>
                         <button class="btn btn-sm btn-outline-primary" style="border-radius:50px;" onclick="showSection('announcements',this)"><i class="bi bi-megaphone me-1"></i>Announce</button>
                     </div>
@@ -126,7 +130,7 @@
                         <table class="sw-table">
                             <thead>
                                 <tr>
-                                    <th>ID</th><th>Customer</th><th>Service</th><th>Weight</th><th>Total</th>
+                                    <th>ID</th><th>Customer</th><th>Service</th><th>Det/Con</th><th>Weight</th><th>Total</th>
                                     <th>Status</th><th>Review</th><th>Staff</th><th>Warehouse</th><th></th>
                                 </tr>
                             </thead>
@@ -139,6 +143,10 @@
                                         <td class="fw-bold">#@o.Id</td>
                                         <td class="small">@(customer != null ? customer.FullName : "—")</td>
                                         <td class="small">@(!string.IsNullOrEmpty(o.ServiceId) && serviceDict.ContainsKey(o.ServiceId) ? serviceDict[o.ServiceId] : "—")</td>
+                                        <td class="small">
+                                            <div class="small fw-semibold">D: @(!string.IsNullOrEmpty(o.DetergentId) && detergentDict.ContainsKey(o.DetergentId) ? detergentDict[o.DetergentId] : "—")</div>
+                                            <div class="small text-muted" style="font-size:0.7rem;">C: @(!string.IsNullOrEmpty(o.ConditionerId) && conditionerDict.ContainsKey(o.ConditionerId) ? conditionerDict[o.ConditionerId] : "—")</div>
+                                        </td>
                                         <td>@(o.WeightKg.HasValue ? o.WeightKg.Value.ToString("F1") + " kg" : "—")</td>
                                         <td class="fw-bold text-primary">@(o.TotalPrice.HasValue ? "₱" + o.TotalPrice.Value.ToString("F2") : "—")</td>
                                         <td><span class="sw-status-badge sw-status-@o.Status.Replace(" ", "-").ToLower()">@o.Status</span></td>
@@ -148,6 +156,7 @@
                                                 <div class="d-flex align-items-center gap-1">
                                                     <span class="text-warning small" style="letter-spacing: -2px;">@(new string('⭐', reviewDict[o.Id].Rating))</span>
                                                     <button class="btn btn-sm btn-outline-secondary border-0 p-0" style="line-height: 1;" 
+                                                            data-bs-toggle="modal" data-bs-target="#adminReviewModal"
                                                             onclick="showAdminReview('@reviewDict[o.Id].Rating', '@(reviewDict[o.Id].Comment?.Replace("'", "\\'").Replace("\r", "").Replace("\n", "\\n"))', '@(reviewDict[o.Id].CreatedAt.ToString("MMM dd, yyyy"))')">
                                                         <i class="bi bi-info-circle" style="font-size: 0.85rem;"></i>
                                                     </button>
@@ -499,6 +508,65 @@
             </div>
         </div>
 
+        <div id="section-conditioners" class="admin-section d-none">
+            <div class="sw-card mb-4">
+                <div class="p-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-plus-circle text-primary me-2"></i>Add New Conditioner</h5>
+                    <form method="post" action="/Admin/CreateConditioner">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-3"><label class="form-label small fw-semibold">Name</label><input type="text" name="name" class="form-control sw-input" placeholder="Lavender Fresh" required /></div>
+                            <div class="col-md-3"><label class="form-label small fw-semibold">Brand</label><input type="text" name="brand" class="form-control sw-input" placeholder="Downy/Comfort" /></div>
+                            <div class="col-md-2">
+                                <div class="form-check form-switch mt-2">
+                                    <input class="form-check-input" type="checkbox" name="isActive" value="true" checked />
+                                    <label class="form-check-label small">Active</label>
+                                </div>
+                            </div>
+                            <div class="col-md-2"><button type="submit" class="sw-btn sw-btn-primary w-100" style="min-height:44px;"><i class="bi bi-plus me-1"></i>Add</button></div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="sw-card">
+                <div class="p-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-flower1 text-primary me-2"></i>All Conditioners (@conditioners.Count)</h5>
+                    @if (conditioners.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="sw-table">
+                                <thead><tr><th>Name</th><th>Brand</th><th>Status</th><th></th></tr></thead>
+                                <tbody>
+                                    @foreach (var c in conditioners)
+                                    {
+                                        <tr class="@(c.IsActive == true ? "" : "opacity-50")">
+                                            <td class="fw-semibold">@c.Name</td>
+                                            <td class="small">@(c.Brand ?? "—")</td>
+                                            <td><span class="sw-status-badge @(c.IsActive == true ? "sw-status-delivered" : "sw-status-cancelled")">@(c.IsActive == true ? "Active" : "Inactive")</span></td>
+                                            <td>
+                                                <div class="d-flex gap-1">
+                                                    <form method="post" action="/Admin/ToggleConditioner">
+                                                        <input type="hidden" name="id" value="@c.Id" />
+                                                        <button type="submit" class="btn btn-sm @(c.IsActive == true ? "btn-outline-warning" : "btn-outline-success")" style="border-radius:var(--sw-radius-xs);">
+                                                            <i class="bi @(c.IsActive == true ? "bi-pause" : "bi-play")"></i>
+                                                        </button>
+                                                    </form>
+                                                    <button class="btn btn-sm btn-outline-danger" style="border-radius:var(--sw-radius-xs);" data-bs-toggle="modal" data-bs-target="#deleteCon-@c.Id"><i class="bi bi-trash"></i></button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="sw-empty-state"><i class="bi bi-flower1"></i><p>No conditioners yet</p></div>
+                    }
+                </div>
+            </div>
+        </div>
+
         <div id="section-announcements" class="admin-section d-none">
             <div class="sw-card mb-4">
                 <div class="p-4">
@@ -702,6 +770,30 @@
     </div>
 }
 
+@foreach (var c in conditioners)
+{
+    <div class="modal fade" id="deleteCon-@c.Id" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius:var(--sw-radius-lg);">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-exclamation-triangle text-danger me-2"></i>Delete Conditioner</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete <strong>@c.Name</strong>? This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-secondary" style="border-radius:var(--sw-radius-sm);" data-bs-dismiss="modal">Cancel</button>
+                    <form method="post" action="/Admin/ToggleConditioner">
+                        <input type="hidden" name="id" value="@c.Id" />
+                        <button type="submit" class="btn btn-danger" style="border-radius:var(--sw-radius-sm);"><i class="bi bi-trash me-1"></i>Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @section Scripts {
 <script>
     function showSection(name, el) {
@@ -773,13 +865,18 @@
     })();
     function showAdminReview(rating, comment, date) {
         var stars = '';
-        for (var i = 0; i < 5; i++) stars += i < rating ? '⭐' : '☆';
+        for (var i = 0; i < 5; i++) stars += (i < rating) ? '⭐' : '☆';
         document.getElementById('adminReviewStars').innerText = stars;
         document.getElementById('adminReviewComment').innerText = comment || 'No comment provided.';
         document.getElementById('adminReviewDate').innerText = 'Reviewed on ' + date;
-        new bootstrap.Modal(document.getElementById('adminReviewModal')).show();
+        
+        // Ensure modal is shown (some browsers need manual trigger if initialized by code)
+        var modalEl = document.getElementById('adminReviewModal');
+        var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+        modal.show();
     }
 </script>
+}
 
 @section Modals {
 <div class="modal fade" id="adminReviewModal" tabindex="-1">
@@ -798,6 +895,35 @@
         </div>
     </div>
 </div>
-}
-}
 
+<div class="modal fade" id="addConditionerModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content sw-modal">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Add New Conditioner</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="/Admin/CreateConditioner">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Name</label>
+                        <input type="text" name="name" class="form-control sw-input" placeholder="e.g. Lavender Fresh" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Brand</label>
+                        <input type="text" name="brand" class="form-control sw-input" placeholder="e.g. Downy" />
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" name="isActive" value="true" checked />
+                        <label class="form-check-label small fw-bold">Active</label>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="sw-btn sw-btn-outline" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="sw-btn sw-btn-primary px-4">Create Conditioner</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+}

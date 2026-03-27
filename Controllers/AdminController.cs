@@ -30,6 +30,9 @@ namespace SmartWash.Controllers
             var detergentsResponse = await _supabase.From<Detergent>().Get();
             var detergentDict = detergentsResponse.Models?.ToDictionary(d => d.Id, d => d.Name) ?? new Dictionary<string, string>();
 
+            var conditionersResponse = await _supabase.From<Conditioner>().Get();
+            var conditionerDict = conditionersResponse.Models?.ToDictionary(c => c.Id, c => c.Name) ?? new Dictionary<string, string>();
+
             var profilesResponse = await _supabase.From<Profile>().Get();
             var profileDict = profilesResponse.Models?.ToDictionary(p => p.Id, p => p) ?? new Dictionary<string, Profile>();
 
@@ -64,6 +67,8 @@ namespace SmartWash.Controllers
             ViewBag.Services = servicesResponse.Models ?? new List<Service>();
             ViewBag.DetergentDict = detergentDict;
             ViewBag.Detergents = detergentsResponse.Models ?? new List<Detergent>();
+            ViewBag.ConditionerDict = conditionerDict;
+            ViewBag.Conditioners = conditionersResponse.Models ?? new List<Conditioner>();
             ViewBag.ProfileDict = profileDict;
             ViewBag.RoleDict = roleDict;
             ViewBag.Warehouses = warehouses;
@@ -347,6 +352,45 @@ namespace SmartWash.Controllers
         public async Task<IActionResult> DeleteDetergent(string id)
         {
             await _supabase.From<Detergent>()
+                .Filter("id", Operator.Equals, id)
+                .Delete();
+
+            return RedirectToAction("Dashboard");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateConditioner(string name, string brand, bool isActive)
+        {
+            var conditioner = new Conditioner
+            {
+                Name = name,
+                Brand = brand,
+                IsActive = isActive
+            };
+
+            await _supabase.From<Conditioner>().Insert(conditioner);
+            return RedirectToAction("Dashboard");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ToggleConditioner(string id)
+        {
+            var conditioner = await _supabase.From<Conditioner>()
+                .Filter("id", Operator.Equals, id)
+                .Single();
+
+            if (conditioner == null) return NotFound();
+
+            conditioner.IsActive = !(conditioner.IsActive ?? true);
+            await _supabase.From<Conditioner>().Update(conditioner);
+
+            return RedirectToAction("Dashboard");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteConditioner(string id)
+        {
+            await _supabase.From<Conditioner>()
                 .Filter("id", Operator.Equals, id)
                 .Delete();
 

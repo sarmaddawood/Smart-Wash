@@ -4,6 +4,7 @@
     var service = ViewBag.Service as SmartWash.Models.Service;
     var customer = ViewBag.Customer as SmartWash.Models.Profile;
     var detergent = ViewBag.Detergent as SmartWash.Models.Detergent;
+    var conditioner = ViewBag.Conditioner as SmartWash.Models.Conditioner;
     var warehouse = ViewBag.Warehouse as SmartWash.Models.Warehouse;
 
     var weighedStatuses = new[] { "Weighed & Measured", "Washing", "Ready for Delivery", "Out for Delivery", "Delivered" };
@@ -54,12 +55,12 @@
                     <div class="mb-4">
                         <h6 class="fw-bold small text-muted text-uppercase mb-3">Order Details</h6>
                         <div class="d-flex justify-content-between small mb-1">
-                            <span class="text-muted">Service</span>
-                            <span class="fw-semibold">@service?.Name</span>
-                        </div>
-                        <div class="d-flex justify-content-between small mb-1">
                             <span class="text-muted">Detergent</span>
                             <span class="fw-semibold">@(detergent?.Name ?? "—")</span>
+                        </div>
+                        <div class="d-flex justify-content-between small mb-1">
+                            <span class="text-muted">Conditioner</span>
+                            <span class="fw-semibold">@(conditioner?.Name ?? "—")</span>
                         </div>
                         <div class="d-flex justify-content-between small mb-1">
                             <span class="text-muted">Weight</span>

@@ -2,6 +2,7 @@
     ViewData["Title"] = "Place Order";
     var services = ViewBag.Services as List<SmartWash.Models.Service> ?? new List<SmartWash.Models.Service>();
     var detergents = ViewBag.Detergents as List<SmartWash.Models.Detergent> ?? new List<SmartWash.Models.Detergent>();
+    var conditioners = ViewBag.Conditioners as List<SmartWash.Models.Conditioner> ?? new List<SmartWash.Models.Conditioner>();
     var userName = ViewBag.UserName as string ?? "";
     var userEmail = ViewBag.UserEmail as string ?? "";
     var userPhone = ViewBag.UserPhone as string ?? "";
@@ -66,6 +67,25 @@
                             </div>
                             <input type="hidden" name="detergentId" id="detergentId" required />
                             <div id="detergentError" class="text-danger small d-none"><i class="bi bi-exclamation-circle me-1"></i>Please select a detergent</div>
+
+                            <h5 class="fw-bold mb-3 mt-4"><i class="bi bi-flower1 text-primary me-2"></i>Select Conditioner</h5>
+                            <div class="row g-3 mb-3">
+                                @foreach (var con in conditioners)
+                                {
+                                    <div class="col-md-4 col-6">
+                                        <div class="sw-service-select-card p-3 text-center" data-conditioner-id="@con.Id" data-conditioner-name="@con.Name" onclick="selectConditioner(this)">
+                                            <div class="sw-service-icon-wrap mx-auto mb-2" style="width:40px;height:40px;border-color:var(--sw-secondary);background:var(--sw-secondary-light);color:var(--sw-secondary);margin:0;font-size:1rem;">🌸</div>
+                                            <h6 class="fw-bold mb-0 small">@con.Name</h6>
+                                            @if (!string.IsNullOrEmpty(con.Brand))
+                                            {
+                                                <span class="text-muted" style="font-size:0.72rem;">@con.Brand</span>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            <input type="hidden" name="conditionerId" id="conditionerId" required />
+                            <div id="conditionerError" class="text-danger small d-none"><i class="bi bi-exclamation-circle me-1"></i>Please select a conditioner</div>
 
                             <div class="mb-3 mt-3">
                                 <label class="form-label fw-semibold small">Special Instructions (optional)</label>
@@ -152,6 +172,10 @@
                         <span class="text-muted">Detergent:</span>
                         <span class="fw-semibold" id="summaryDetergent">—</span>
                     </div>
+                    <div class="d-flex justify-content-between small mb-2">
+                        <span class="text-muted">Conditioner:</span>
+                        <span class="fw-semibold" id="summaryConditioner">—</span>
+                    </div>
                     <hr />
                     <div class="d-flex justify-content-between small mb-2">
                         <span class="text-muted">Weight:</span>
@@ -180,6 +204,7 @@
 <script>
     var selectedName = '';
     var selectedDetergentName = '';
+    var selectedConditionerName = '';
     var map, pickupMarker, deliveryMarker;
 
     function selectService(el) {
@@ -200,6 +225,15 @@
         document.getElementById('detergentError').classList.add('d-none');
     }
 
+    function selectConditioner(el) {
+        document.querySelectorAll('.sw-service-select-card[data-conditioner-id]').forEach(c => c.classList.remove('selected'));
+        el.classList.add('selected');
+        document.getElementById('conditionerId').value = el.dataset.conditionerId;
+        selectedConditionerName = el.dataset.conditionerName;
+        document.getElementById('summaryConditioner').textContent = selectedConditionerName;
+        document.getElementById('conditionerError').classList.add('d-none');
+    }
+
     function goToStep(step) {
         if (step === 2) {
             if (!document.getElementById('serviceId').value) {
@@ -208,6 +242,10 @@
             }
             if (!document.getElementById('detergentId').value) {
                 document.getElementById('detergentError').classList.remove('d-none');
+                return;
+            }
+            if (!document.getElementById('conditionerId').value) {
+                document.getElementById('conditionerError').classList.remove('d-none');
                 return;
             }
         }

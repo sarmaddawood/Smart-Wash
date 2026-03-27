@@ -41,6 +41,9 @@ namespace SmartWash.Controllers
             var detergentsResponse = await _supabase.From<Detergent>().Get();
             var detergentDict = detergentsResponse.Models?.ToDictionary(d => d.Id, d => d.Name) ?? new Dictionary<string, string>();
 
+            var conditionersResponse = await _supabase.From<Conditioner>().Get();
+            var conditionerDict = conditionersResponse.Models?.ToDictionary(c => c.Id, c => c.Name) ?? new Dictionary<string, string>();
+
             var profilesResponse = await _supabase.From<Profile>().Get();
             var profileDict = profilesResponse.Models?.ToDictionary(p => p.Id, p => p) ?? new Dictionary<string, Profile>();
 
@@ -52,6 +55,7 @@ namespace SmartWash.Controllers
             ViewBag.ServiceDict = serviceDict;
             ViewBag.ServicePriceDict = servicePriceDict;
             ViewBag.DetergentDict = detergentDict;
+            ViewBag.ConditionerDict = conditionerDict;
             ViewBag.ProfileDict = profileDict;
             ViewBag.WarehouseDict = warehouseDict;
 
@@ -75,6 +79,12 @@ namespace SmartWash.Controllers
             {
                 var detergent = await _supabase.From<Detergent>().Filter("id", Operator.Equals, order.DetergentId).Single();
                 ViewBag.Detergent = detergent;
+            }
+
+            if (!string.IsNullOrEmpty(order.ConditionerId))
+            {
+                var conditioner = await _supabase.From<Conditioner>().Filter("id", Operator.Equals, order.ConditionerId).Single();
+                ViewBag.Conditioner = conditioner;
             }
 
             ViewBag.StaffId = HttpContext.Session.GetString("UserId") ?? "";

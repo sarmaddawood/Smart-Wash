@@ -33,6 +33,12 @@ namespace SmartWash.Controllers
             var services = await _supabase.From<Service>().Get();
             var serviceDict = services.Models?.ToDictionary(s => s.Id, s => s.Name) ?? new Dictionary<string, string>();
 
+            var detergents = await _supabase.From<Detergent>().Get();
+            var detergentDict = detergents.Models?.ToDictionary(d => d.Id, d => d.Name) ?? new Dictionary<string, string>();
+
+            var conditioners = await _supabase.From<Conditioner>().Get();
+            var conditionerDict = conditioners.Models?.ToDictionary(c => c.Id, c => c.Name) ?? new Dictionary<string, string>();
+
             var profiles = await _supabase.From<Profile>().Get();
             var profileDict = profiles.Models?.ToDictionary(p => p.Id, p => p) ?? new Dictionary<string, Profile>();
 
@@ -40,6 +46,8 @@ namespace SmartWash.Controllers
             ViewBag.ReadyOrders = readyOrders.Models ?? new List<Order>();
             ViewBag.MyActiveOrders = myActiveOrders;
             ViewBag.ServiceDict = serviceDict;
+            ViewBag.DetergentDict = detergentDict;
+            ViewBag.ConditionerDict = conditionerDict;
             ViewBag.ProfileDict = profileDict;
             ViewBag.RiderId = riderId;
 
@@ -63,6 +71,12 @@ namespace SmartWash.Controllers
             {
                 var detergent = await _supabase.From<Detergent>().Filter("id", Operator.Equals, order.DetergentId).Single();
                 ViewBag.Detergent = detergent;
+            }
+
+            if (!string.IsNullOrEmpty(order.ConditionerId))
+            {
+                var conditioner = await _supabase.From<Conditioner>().Filter("id", Operator.Equals, order.ConditionerId).Single();
+                ViewBag.Conditioner = conditioner;
             }
 
             if (!string.IsNullOrEmpty(order.WarehouseId))

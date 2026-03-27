@@ -32,6 +32,9 @@ namespace SmartWash.Controllers
             var detergents = await _supabase.From<Detergent>().Get();
             var detergentDict = detergents.Models.ToDictionary(d => d.Id, d => d.Name);
 
+            var conditioners = await _supabase.From<Conditioner>().Get();
+            var conditionerDict = conditioners.Models.ToDictionary(c => c.Id, c => c.Name);
+
             var reviews = await _supabase.From<Review>()
                 .Filter("customer_id", Operator.Equals, customerId)
                 .Get();
@@ -45,6 +48,7 @@ namespace SmartWash.Controllers
             ViewBag.AllOrders = allOrders;
             ViewBag.ServiceDict = serviceDict;
             ViewBag.DetergentDict = detergentDict;
+            ViewBag.ConditionerDict = conditionerDict;
             ViewBag.ReviewedOrderIds = reviewedOrderIds;
 
             return View();
@@ -78,6 +82,15 @@ namespace SmartWash.Controllers
                     .Filter("id", Operator.Equals, order.DetergentId)
                     .Single();
                 detergentName = detergent?.Name ?? "—";
+            }
+
+            var conditionerName = "—";
+            if (!string.IsNullOrEmpty(order.ConditionerId))
+            {
+                var conditioner = await _supabase.From<Conditioner>()
+                    .Filter("id", Operator.Equals, order.ConditionerId)
+                    .Single();
+                conditionerName = conditioner?.Name ?? "—";
             }
 
             await _emailService.SendStatusEmail(customerEmail, customerName, order.Id, service.Name, detergentName, order.WeightKg, order.TotalPrice, "Cancelled");

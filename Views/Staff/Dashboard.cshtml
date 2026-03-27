@@ -5,6 +5,7 @@
     var activeOrders = ViewBag.MyActiveOrders as List<SmartWash.Models.Order> ?? new List<SmartWash.Models.Order>();
     var serviceDict = ViewBag.ServiceDict as Dictionary<string, string> ?? new Dictionary<string, string>();
     var detergentDict = ViewBag.DetergentDict as Dictionary<string, string> ?? new Dictionary<string, string>();
+    var conditionerDict = ViewBag.ConditionerDict as Dictionary<string, string> ?? new Dictionary<string, string>();
     var profileDict = ViewBag.ProfileDict as Dictionary<string, SmartWash.Models.Profile> ?? new Dictionary<string, SmartWash.Models.Profile>();
 }
 
@@ -53,7 +54,7 @@
                                 <th class="fs-12 text-muted text-uppercase">Order ID</th>
                                 <th class="fs-12 text-muted text-uppercase">Customer</th>
                                 <th class="fs-12 text-muted text-uppercase">Service</th>
-                                <th class="fs-12 text-muted text-uppercase">Detergent</th>
+                                <th class="fs-12 text-muted text-uppercase">Det/Con</th>
                                 <th class="fs-12 text-muted text-uppercase">Pickup Address</th>
                                 <th class="fs-12 text-muted text-uppercase">Date</th>
                                 <th class="fs-12 text-muted text-uppercase">Action</th>
@@ -67,7 +68,10 @@
                                     <td class="text-truncate" style="max-width: 80px;">@order.Id</td>
                                     <td>@(customer?.FullName ?? "Unknown")</td>
                                     <td>@(serviceDict.ContainsKey(order.ServiceId ?? "") ? serviceDict[order.ServiceId!] : "Unknown")</td>
-                                    <td>@(detergentDict.ContainsKey(order.DetergentId ?? "") ? detergentDict[order.DetergentId!] : "None")</td>
+                                    <td class="small">
+                                        <div class="fw-bold">@(detergentDict.ContainsKey(order.DetergentId ?? "") ? detergentDict[order.DetergentId!] : "—")</div>
+                                        <div class="text-primary" style="font-size:0.7rem;">@(conditionerDict.ContainsKey(order.ConditionerId ?? "") ? conditionerDict[order.ConditionerId!] : "—")</div>
+                                    </td>
                                     <td class="text-truncate" style="max-width: 150px;">@order.PickupAddress</td>
                                     <td>@order.PickupDate?.ToString("MMM dd")</td>
                                     <td>
@@ -94,8 +98,7 @@
                         <thead>
                             <tr>
                                 <th class="fs-12 text-muted text-uppercase">Order ID</th>
-                                <th class="fs-12 text-muted text-uppercase">Customer</th>
-                                <th class="fs-12 text-muted text-uppercase">Service</th>
+                                <th class="fs-12 text-muted text-uppercase">Customer / Selection</th>
                                 <th class="fs-12 text-muted text-uppercase">Weight</th>
                                 <th class="fs-12 text-muted text-uppercase">Total</th>
                                 <th class="fs-12 text-muted text-uppercase">Status</th>
@@ -108,8 +111,13 @@
                                 var customer = profileDict.ContainsKey(order.CustomerId ?? "") ? profileDict[order.CustomerId!] : null;
                                 <tr>
                                     <td class="text-truncate" style="max-width: 80px;">@order.Id</td>
-                                    <td>@(customer?.FullName ?? "Unknown")</td>
-                                    <td>@(serviceDict.ContainsKey(order.ServiceId ?? "") ? serviceDict[order.ServiceId!] : "Unknown")</td>
+                                    <td>
+                                        <div class="fw-bold">@(serviceDict.ContainsKey(order.ServiceId ?? "") ? serviceDict[order.ServiceId!] : "Unknown")</div>
+                                        <div class="small text-muted" style="font-size:0.7rem;">
+                                            @(detergentDict.ContainsKey(order.DetergentId ?? "") ? detergentDict[order.DetergentId!] : "—") + 
+                                            @(conditionerDict.ContainsKey(order.ConditionerId ?? "") ? conditionerDict[order.ConditionerId!] : "—")
+                                        </div>
+                                    </td>
                                     <td>@(order.WeightKg.HasValue ? $"{order.WeightKg}kg" : "—")</td>
                                     <td class="fw-bold">@(order.TotalPrice.HasValue ? $"₱{order.TotalPrice:F2}" : "—")</td>
                                     <td>

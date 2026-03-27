@@ -5,6 +5,8 @@
     var readyOrders = ViewBag.ReadyOrders as List<SmartWash.Models.Order> ?? new List<SmartWash.Models.Order>();
     var activeJobs = ViewBag.MyActiveOrders as List<SmartWash.Models.Order> ?? new List<SmartWash.Models.Order>();
     var serviceDict = ViewBag.ServiceDict as Dictionary<string, string> ?? new Dictionary<string, string>();
+    var detergentDict = ViewBag.DetergentDict as Dictionary<string, string> ?? new Dictionary<string, string>();
+    var conditionerDict = ViewBag.ConditionerDict as Dictionary<string, string> ?? new Dictionary<string, string>();
     var profileDict = ViewBag.ProfileDict as Dictionary<string, SmartWash.Models.Profile> ?? new Dictionary<string, SmartWash.Models.Profile>();
     var riderId = ViewBag.RiderId as string;
 }
@@ -57,7 +59,7 @@
                                 <th class="fs-12 text-muted text-uppercase">Customer</th>
                                 <th class="fs-12 text-muted text-uppercase">Pickup Address</th>
                                 <th class="fs-12 text-muted text-uppercase">Date</th>
-                                <th class="fs-12 text-muted text-uppercase">Service</th>
+                                <th class="fs-12 text-muted text-uppercase">Selection</th>
                                 <th class="fs-12 text-muted text-uppercase">Action</th>
                             </tr>
                         </thead>
@@ -70,7 +72,13 @@
                                     <td>@(customer?.FullName ?? "Unknown")</td>
                                     <td class="text-truncate" style="max-width: 200px;">@order.PickupAddress</td>
                                     <td>@order.PickupDate?.ToString("MMM dd, yyyy")</td>
-                                    <td>@(serviceDict.ContainsKey(order.ServiceId ?? "") ? serviceDict[order.ServiceId!] : "Unknown")</td>
+                                    <td class="small">
+                                        <div class="fw-bold">@(serviceDict.ContainsKey(order.ServiceId ?? "") ? serviceDict[order.ServiceId!] : "—")</div>
+                                        <div class="text-muted" style="font-size:0.7rem;">
+                                            @(detergentDict.ContainsKey(order.DetergentId ?? "") ? detergentDict[order.DetergentId!] : "—") + 
+                                            @(conditionerDict.ContainsKey(order.ConditionerId ?? "") ? conditionerDict[order.ConditionerId!] : "—")
+                                        </div>
+                                    </td>
                                     <td>
                                         <a href="@Url.Action("OrderDetail", "Rider", new { id = order.Id })" class="sw-btn sw-btn-primary p-1 px-3" style="font-size: 0.85rem; min-height: 32px;">View & Accept</a>
                                     </td>
@@ -97,7 +105,7 @@
                                 <th class="fs-12 text-muted text-uppercase">Order ID</th>
                                 <th class="fs-12 text-muted text-uppercase">Customer</th>
                                 <th class="fs-12 text-muted text-uppercase">Delivery Address</th>
-                                <th class="fs-12 text-muted text-uppercase">Service</th>
+                                <th class="fs-12 text-muted text-uppercase">Selection</th>
                                 <th class="fs-12 text-muted text-uppercase">Action</th>
                             </tr>
                         </thead>
@@ -109,7 +117,13 @@
                                     <td class="text-truncate" style="max-width: 80px;">@order.Id</td>
                                     <td>@(customer?.FullName ?? "Unknown")</td>
                                     <td class="text-truncate" style="max-width: 200px;">@order.DeliveryAddress</td>
-                                    <td>@(serviceDict.ContainsKey(order.ServiceId ?? "") ? serviceDict[order.ServiceId!] : "Unknown")</td>
+                                    <td class="small">
+                                        <div class="fw-bold">@(serviceDict.ContainsKey(order.ServiceId ?? "") ? serviceDict[order.ServiceId!] : "—")</div>
+                                        <div class="text-muted" style="font-size:0.7rem;">
+                                            @(detergentDict.ContainsKey(order.DetergentId ?? "") ? detergentDict[order.DetergentId!] : "—") + 
+                                            @(conditionerDict.ContainsKey(order.ConditionerId ?? "") ? conditionerDict[order.ConditionerId!] : "—")
+                                        </div>
+                                    </td>
                                     <td>
                                         <a href="@Url.Action("OrderDetail", "Rider", new { id = order.Id })" class="sw-btn sw-btn-primary p-1 px-3" style="font-size: 0.85rem; min-height: 32px;">View & Accept</a>
                                     </td>
@@ -135,7 +149,7 @@
                             <tr>
                                 <th class="fs-12 text-muted text-uppercase">Order ID</th>
                                 <th class="fs-12 text-muted text-uppercase">Customer</th>
-                                <th class="fs-12 text-muted text-uppercase">Type</th>
+                                <th class="fs-12 text-muted text-uppercase">Type / Selection</th>
                                 <th class="fs-12 text-muted text-uppercase">Status</th>
                                 <th class="fs-12 text-muted text-uppercase">Action</th>
                             </tr>
@@ -149,9 +163,15 @@
                                     <td>@order.Id.Substring(0, 8)...</td>
                                     <td>@(customer?.FullName ?? "Unknown")</td>
                                     <td>
-                                        <span class="sw-status-badge @(isPickup ? "sw-status-pending" : "sw-status-ready-for-delivery")">
-                                            @(isPickup ? "Pickup" : "Delivery")
-                                        </span>
+                                        <div class="mb-1">
+                                            <span class="sw-status-badge @(isPickup ? "sw-status-pending" : "sw-status-ready-for-delivery")">
+                                                @(isPickup ? "Pickup" : "Delivery")
+                                            </span>
+                                        </div>
+                                        <div class="small text-muted" style="font-size:0.7rem;">
+                                            @(detergentDict.ContainsKey(order.DetergentId ?? "") ? detergentDict[order.DetergentId!] : "—") + 
+                                            @(conditionerDict.ContainsKey(order.ConditionerId ?? "") ? conditionerDict[order.ConditionerId!] : "—")
+                                        </div>
                                     </td>
                                     <td>
                                         <span class="sw-status-badge sw-status-@order.Status.Replace(" ", "-").ToLower()">@order.Status</span>

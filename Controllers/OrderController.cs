@@ -25,6 +25,9 @@ namespace SmartWash.Controllers
             var detergents = await _supabase.From<Detergent>().Get();
             ViewBag.Detergents = detergents.Models?.Where(d => d.IsActive == true).ToList() ?? new List<Detergent>();
 
+            var conditioners = await _supabase.From<Conditioner>().Get();
+            ViewBag.Conditioners = conditioners.Models?.Where(c => c.IsActive == true).ToList() ?? new List<Conditioner>();
+
             ViewBag.UserName = HttpContext.Session.GetString("UserName") ?? "Guest";
             ViewBag.UserRole = HttpContext.Session.GetString("UserRole") ?? "Guest";
             ViewBag.UserEmail = HttpContext.Session.GetString("UserEmail") ?? "";
@@ -33,7 +36,7 @@ namespace SmartWash.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Place(string serviceId, string detergentId, string pickupAddress,
+        public async Task<IActionResult> Place(string serviceId, string detergentId, string conditionerId, string pickupAddress,
             double pickupLat, double pickupLng, string deliveryAddress, double deliveryLat, double deliveryLng,
             string specialInstructions, string pickupDate)
         {
@@ -63,6 +66,7 @@ namespace SmartWash.Controllers
                 CustomerId = customerId,
                 ServiceId = serviceId,
                 DetergentId = detergentId,
+                ConditionerId = conditionerId,
                 PickupAddress = pickupAddress,
                 PickupLat = pickupLat,
                 PickupLng = pickupLng,
@@ -107,6 +111,14 @@ namespace SmartWash.Controllers
                     .Filter("id", Operator.Equals, order.DetergentId)
                     .Single();
                 if (detergent != null) ViewBag.Detergent = detergent;
+            }
+
+            if (!string.IsNullOrEmpty(order.ConditionerId))
+            {
+                var conditioner = await _supabase.From<Conditioner>()
+                    .Filter("id", Operator.Equals, order.ConditionerId)
+                    .Single();
+                if (conditioner != null) ViewBag.Conditioner = conditioner;
             }
 
             if (!string.IsNullOrEmpty(order.PickupRiderId))
@@ -161,6 +173,9 @@ namespace SmartWash.Controllers
             var detergents = await _supabase.From<Detergent>().Get();
             var detergentDict = detergents.Models?.ToDictionary(d => d.Id, d => d.Name) ?? new Dictionary<string, string>();
 
+            var conditioners = await _supabase.From<Conditioner>().Get();
+            var conditionerDict = conditioners.Models?.ToDictionary(c => c.Id, c => c.Name) ?? new Dictionary<string, string>();
+
             var reviewsResponse = await _supabase.From<Review>()
                 .Filter("customer_id", Operator.Equals, customerId)
                 .Get();
@@ -169,6 +184,7 @@ namespace SmartWash.Controllers
             ViewBag.Orders = ordersResponse.Models ?? new List<Order>();
             ViewBag.ServiceDict = serviceDict;
             ViewBag.DetergentDict = detergentDict;
+            ViewBag.ConditionerDict = conditionerDict;
             ViewBag.CurrentFilter = statusFilter ?? "All";
             ViewBag.ReviewedOrderIds = reviewedOrderIds;
 

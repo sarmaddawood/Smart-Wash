@@ -4,6 +4,7 @@
     var allOrders = ViewBag.AllOrders as List<SmartWash.Models.Order> ?? new List<SmartWash.Models.Order>();
     var serviceDict = ViewBag.ServiceDict as Dictionary<string, string> ?? new Dictionary<string, string>();
     var detergentDict = ViewBag.DetergentDict as Dictionary<string, string> ?? new Dictionary<string, string>();
+    var conditionerDict = ViewBag.ConditionerDict as Dictionary<string, string> ?? new Dictionary<string, string>();
     var reviewedOrderIds = ViewBag.ReviewedOrderIds as HashSet<string> ?? new HashSet<string>();
     var userName = ViewBag.UserName as string ?? "";
     var completedCount = allOrders.Count(o => o.Status == "Delivered");
@@ -88,6 +89,7 @@
                     {
                         var svcName = !string.IsNullOrEmpty(o.ServiceId) && serviceDict.ContainsKey(o.ServiceId) ? serviceDict[o.ServiceId] : "—";
                         var detName = !string.IsNullOrEmpty(o.DetergentId) && detergentDict.ContainsKey(o.DetergentId) ? detergentDict[o.DetergentId] : "—";
+                        var conName = !string.IsNullOrEmpty(o.ConditionerId) && conditionerDict.ContainsKey(o.ConditionerId) ? conditionerDict[o.ConditionerId] : "—";
                         var weighedStatuses = new[] { "Weighed & Measured", "Washing", "Ready for Delivery", "Out for Delivery" };
                         var isWeighed = weighedStatuses.Contains(o.Status);
                         <div class="col-md-6 col-lg-4">
@@ -98,7 +100,7 @@
                                         <span class="sw-status-badge sw-status-@o.Status.Replace(" ", "-").ToLower()">@o.Status</span>
                                     </div>
                                     <p class="small text-muted mb-1"><i class="bi bi-stars me-1"></i>@svcName</p>
-                                    <p class="small text-muted mb-1"><i class="bi bi-droplet me-1"></i>@detName</p>
+                                    <p class="small text-muted mb-2"><i class="bi bi-droplet me-1"></i>@detName + @conName</p>
                                     <p class="small text-muted mb-3">
                                         <i class="bi bi-box me-1"></i>@(isWeighed && o.WeightKg.HasValue ? o.WeightKg.Value.ToString("F1") + " kg" : "—") •
                                         <span class="fw-bold text-primary">@(isWeighed && o.TotalPrice.HasValue ? "₱" + o.TotalPrice.Value.ToString("F2") : "—")</span>

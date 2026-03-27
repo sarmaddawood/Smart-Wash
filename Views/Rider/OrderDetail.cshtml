@@ -6,6 +6,7 @@
     var customer = ViewBag.Customer as Profile;
     var service = ViewBag.Service as Service;
     var detergent = ViewBag.Detergent as Detergent;
+    var conditioner = ViewBag.Conditioner as Conditioner;
     var warehouse = ViewBag.Warehouse as Warehouse;
     var warehouses = ViewBag.Warehouses as List<Warehouse> ?? new List<Warehouse>();
     var riderId = ViewBag.RiderId as string;
@@ -44,11 +45,14 @@
                 <div class="row g-2 mb-3">
                     <div class="col-6">
                         <label>Service</label>
-                        <div class="fw-bold">@service?.Name</div>
+                        <div class="fw-bold">@(service?.Name ?? "N/A")</div>
                     </div>
                     <div class="col-6">
-                        <label>Detergent</label>
-                        <div class="fw-bold">@(detergent?.Name ?? "None")</div>
+                        <label>Selection</label>
+                        <div class="fs-12">
+                            <div><i class="bi bi-droplet me-1"></i>@(detergent?.Name ?? "None")</div>
+                            <div class="text-primary"><i class="bi bi-stars me-1"></i>@(conditioner?.Name ?? "None")</div>
+                        </div>
                     </div>
                 </div>
 
